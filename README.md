@@ -17,8 +17,6 @@ If our software or paper helps your research or project, please cite us using:
     }
 
 # Installation
-All code was only tested on ubuntu 16.04, python 2.7, with caffe at commit [d208b71](https://github.com/BVLC/caffe/tree/d208b714abb8425f1b96793e04508ad21724ae3f)
-
 1. Install caffe using these [instructions](https://github.com/BVLC/caffe/wiki/Ubuntu-16.04-or-15.10-Installation-Guide) with CUDA 8 and cuDNN 5.1.
 2. ```pip install -r requirements.txt```
 
@@ -26,7 +24,7 @@ All code was only tested on ubuntu 16.04, python 2.7, with caffe at commit [d208
 1. Create CIFAR-10 LMDB's on each server you plan to use for training  
 
     ``` bash
-    python libs/input_modules/lmdb_creator.py cifar10 /path/to/data/directory/cifar10 -gcn True -v 5000
+    python3 libs/input_modules/lmdb_creator.py cifar10 /path/to/data/directory/cifar10 -gcn True -v 5000
     ```
     
 2. Modify `models/cifar10/hyper_parameters.py`  
@@ -38,17 +36,17 @@ All code was only tested on ubuntu 16.04, python 2.7, with caffe at commit [d208
 4. Start Q-Learning Server
 
     ```bash 
-    python q_server.py cifar10 cifar10_logs
+    python3 q_server.py cifar10 cifar10_logs
     ```
     
 5. On each server you want to use for training start a Q-Learning Client
 
     ```bash
-    python caffe_client.py cifar10 unique_client_identifier server_ip_addr
+    python3 caffe_client.py cifar10 unique_client_identifier server_ip_addr
     ```
     If you want to use a specific gpu, for example GPU 4
     ```bash
-    python caffe_client.py cifar10 unique_client_identifier server_ip_addr -gpu 4
+    python3 caffe_client.py cifar10 unique_client_identifier server_ip_addr -gpu 4
     ```
     If you are using a multi-gpu server and want to run 4 clients that use GPUs 0 1 3 5 (This command requires you to have tmux installed)
     ```bash
@@ -64,31 +62,31 @@ We implemented the Q-Learning algorithm in a distributed server-client framework
 ## Dataset Creation
 We provide easy-to-use helper functions to download and preprocess the CIFAR-10, CIFAR-100, MNIST, and SVHN datasets. It supports standard whitening, local contrast normalization, global contrast normalization, mean subtraction, and padding. The module will save both training and validation lmdbs as well as the full training set and test set lmdbs to the specified location. To see all options run
 ```bash
-python libs/input_modules/lmdb_creator.py -h
+python3 libs/input_modules/lmdb_creator.py -h
 ```
 #### Examples
 1. Create CIFAR-10 dataset with global contrast normalization and 5000 validation images run
 
     ```bash
-    python libs/input_modules/lmdb_creator.py cifar10 /path/to/data/directory/cifar10 -gcn True -v 5000
+    python3 libs/input_modules/lmdb_creator.py cifar10 /path/to/data/directory/cifar10 -gcn True -v 5000
     ```
     
 2. Create MNIST dataset with mean subtraction and 10000 validation images
 
     ```bash
-    python libs/input_modules/lmdb_creator.py mnist /path/to/data/directory/mnist -ms True -v 10000
+    python3 libs/input_modules/lmdb_creator.py mnist /path/to/data/directory/mnist -ms True -v 10000
     ```
 
 3. Create the SVHN dataset with the extra 531131 training images and local contrast normalization and standard validation set
 
     ```bash
-    python libs/input_modules/lmdb_creator.py svhn_full /path/to/data/directory/svhn_full -prep lcn 
+    python3 libs/input_modules/lmdb_creator.py svhn_full /path/to/data/directory/svhn_full -prep lcn 
     ```
     
 4. Create the 10% SVHN dataset with standard whitening
 
     ```bash
-    python libs/input_modules/lmdb_creator.py svhn_small /path/to/data/directory/svhn -prep standard_whiten
+    python3 libs/input_modules/lmdb_creator.py svhn_small /path/to/data/directory/svhn -prep standard_whiten
     ```
 
 # Speeding Up Meta-Modeling with Performance Prediction
