@@ -134,10 +134,10 @@ def run_caffe_return_accuracy(solver_fname, log_file, caffe_root, num_iter=-1, g
 
     if gpu_to_use is not None:
         run_cmd = '%s train --solver %s --gpu %i %s >> %s 2>&1 ' % (
-                os.path.join(caffe_root, 'build/tools/caffe'), solver_fname, gpu_to_use, cmd_suffix, log_file)
+                caffe_root, solver_fname, gpu_to_use, cmd_suffix, log_file)
     else:
         run_cmd = '%s train --solver %s %s >> %s 2>&1 ' % (
-                os.path.join(caffe_root, 'build/tools/caffe'), solver_fname, cmd_suffix, log_file)
+                caffe_root, solver_fname, cmd_suffix, log_file)
 
     # Run the caffe code.
     print("Running [%s]" % run_cmd)
@@ -154,10 +154,10 @@ def run_caffe_return_accuracy(solver_fname, log_file, caffe_root, num_iter=-1, g
 def run_caffe_from_snapshot(solver_fname, log_file, snapshot_file, caffe_root, gpu_to_use=None):
     if gpu_to_use is not None:
         run_cmd = '%s train --solver %s --gpu %i --snapshot %s >> %s 2>&1 ' % (
-                os.path.join(caffe_root, 'build/tools/caffe'), solver_fname, gpu_to_use, snapshot_file, log_file)
+                caffe_root, solver_fname, gpu_to_use, snapshot_file, log_file)
     else:
         run_cmd = '%s train --solver %s --snapshot %s >> %s 2>&1 ' % (
-                os.path.join(caffe_root, 'build/tools/caffe'), solver_fname, snapshot_file, log_file)
+                caffe_root, solver_fname, snapshot_file, log_file)
 
     # Run the caffe code.
     print("Running [%s]" % run_cmd)
