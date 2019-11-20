@@ -12,7 +12,7 @@ IMAGE_WIDTH = 32                                                                
 #Batch Queue parameters
 TRAIN_BATCH_SIZE = 128                                                              # Batch size for training
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 45000                                            # Number of training examples
-NUM_ITER_PER_EPOCH_TRAIN = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN / TRAIN_BATCH_SIZE      
+NUM_ITER_PER_EPOCH_TRAIN = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN // TRAIN_BATCH_SIZE      
 EVAL_BATCH_SIZE = 100                                                               # Batch size for validation
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 5000                                              # Number of validation examples
 NUM_ITER_TO_TRY_LR = NUM_ITER_PER_EPOCH_TRAIN                                       # Number of iterations to try learning rate (based on ACC_THRESHOLD)
@@ -44,10 +44,10 @@ MIRROR = True                                                                   
 CROP = False                                                                        # Randomly Crop input images to final image size
 GCN_APPROX = False                                                                  # subtract 128 and scale
 #Train files
-TRAIN_FILE = '/home/stsaliki/Programming/cifar-10-python/train.lmdb'                                                  # Path to training lmdb file -- YOU NEED TO CHANGE THIS
-VAL_FILE = '/home/stsaliki/Programming/cifar-10-python/val.lmdb'                                                    # Path to validation lmdb file -- YOU NEED TO CHANGE THIS
+TRAIN_FILE = '/home/pthom001/MetaQNN/MetaQnn/cifar10/train.lmdb'                    # Path to training lmdb file -- YOU NEED TO CHANGE THIS
+VAL_FILE = '/home/pthom001/MetaQNN/MetaQnn/cifar10/val.lmdb'                        # Path to validation lmdb file -- YOU NEED TO CHANGE THIS
 
-CAFFE_ROOT = '/usr/bin/caffe'                                # Path to caffe root directory -- YOU NEED TO CHANGE THIS
+CAFFE_ROOT = '/home/pthom001/anaconda3/envs/ml-env/bin/caffe'                                # Path to caffe root directory -- YOU NEED TO CHANGE THIS
 
 # For training caffe checkpoints
-CHECKPOINT_DIR = '/home/stsaliki/Programming/cifar-10-python/trained_models/' + MODEL_NAME                                     # Path to where model snapshots are saved
+CHECKPOINT_DIR = '/home/pthom001/MetaQNN/MetaQnn/cifar10/trained_models/' + MODEL_NAME                                     # Path to where model snapshots are saved
