@@ -12,7 +12,7 @@ IMAGE_WIDTH = 32                                                                
 #Batch Queue parameters
 TRAIN_BATCH_SIZE = 128                                                              # Batch size for training
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 68257                                            # Number of training examples
-NUM_ITER_PER_EPOCH_TRAIN = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN / TRAIN_BATCH_SIZE      
+NUM_ITER_PER_EPOCH_TRAIN = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN  // TRAIN_BATCH_SIZE      
 EVAL_BATCH_SIZE = 100                                                               # Batch size for validation
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 5000                                              # Number of validation examples
 NUM_ITER_TO_TRY_LR = NUM_ITER_PER_EPOCH_TRAIN                                       # Number of iterations to try learning rate (based on ACC_THRESHOLD)

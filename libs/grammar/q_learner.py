@@ -223,8 +223,10 @@ class QLearner:
             max_actions = [action_values['actions'][i] for i in max_q_indexes]
             action = se.State(state_list=max_actions[np.random.randint(len(max_actions))])
 
+        print("Transitioning from "+str(self.state.as_tuple())+" ("+str(self.bucketed_state.as_tuple())+") with action "+str(action.as_tuple()))
         self.state = self.enum.state_action_transition(self.state, action)
         self.bucketed_state = self.enum.bucket_state(self.state)
+        print("New state "+str(self.bucketed_state.as_tuple()))
 
         self._post_transition_updates()
 
@@ -261,10 +263,17 @@ class QLearner:
 
     def _update_q_value(self, start_state, to_state, reward):
         ''' Update a single Q-Value for start_state given the state we transitioned to and the reward. '''
+
+        print("Start state:")
+        print(start_state.as_tuple())
+        print("Target state:")
+        print(to_state.as_tuple())
+
         if start_state.as_tuple() not in self.qstore.q:
             self.enum.enumerate_state(start_state, self.qstore.q)
         if to_state.as_tuple() not in self.qstore.q:
             self.enum.enumerate_state(to_state, self.qstore.q)
+
 
         actions = self.qstore.q[start_state.as_tuple()]['actions']
         values = self.qstore.q[start_state.as_tuple()]['utilities']
@@ -274,6 +283,13 @@ class QLearner:
         action_between_states = self.enum.transition_to_action(start_state, to_state).as_tuple()
 
         # Q_Learning update rule
+        print(actions)
+        print(action_between_states)
+
+        if action_between_states not in actions:
+            if action_between_states[0] != 'pool':
+                print("Not in dict while being:"+action_between_states[0])
+
         values[actions.index(action_between_states)] = values[actions.index(action_between_states)] + \
                                                 self.state_space_parameters.learning_rate * (reward + self.state_space_parameters.discount_factor * max_over_next_states - values[actions.index(action_between_states)])
 

@@ -20,7 +20,7 @@ class StateStringUtils:
         new_state_list = []
         number_fc = len([state for state in state_list if state.layer_type == 'fc'])
         number_gap = len([state for state in state_list if state.layer_type == 'gap'])
-        number_drop_layers = (len(state_list) - number_gap - number_fc)/2 + number_fc
+        number_drop_layers = (len(state_list) - number_gap - number_fc)//2 + number_fc
         drop_number = 1
         for i in range(len(state_list)):
             new_state_list.append(state_list[i])

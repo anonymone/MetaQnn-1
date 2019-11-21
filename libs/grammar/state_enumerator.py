@@ -106,22 +106,33 @@ class StateEnumerator:
 
             if state.layer_depth < self.layer_limit:
 
-                # Conv states -- iterate through all possible depths, filter sizes, and strides
+                # print('# Conv states -- iterate through all possible depths, filter sizes, and strides')
+                # print('State'+state.layer_type)
                 if (state.layer_type in ['start', 'conv', 'pool']):
                     for depth in self.ssp.possible_conv_depths:
                         for filt in self._possible_conv_sizes(state.image_size):
+                            img_size = state.image_size 
+                            # print("Image Size before: "+str(img_size))
+                            if (self.ssp.conv_padding == 'SAME') :
+                                img_size = state.image_size 
+                            else :
+                                img_size = self._calc_new_image_size(state.image_size, filt, 1)
+                            # print("Image Size after: "+str(img_size))
+
                             actions += [State(layer_type='conv',
                                               layer_depth=state.layer_depth + 1,
                                               filter_depth=depth,
                                               filter_size=filt,
                                               stride=1,
-                                              image_size=state.image_size if self.ssp.conv_padding == 'SAME' \
-                                                                          else self._calc_new_image_size(state.image_size, filt, 1),
+                                              image_size= img_size,
                                               fc_size=0,
                                               terminate=0)]
 
-                # Global Average Pooling States
+                # print('# Global Average Pooling States')
+                # print('State'+state.layer_type)
                 if (state.layer_type in ['start', 'conv', 'pool']):
+                    print('Image size before: '+str(state.image_size))
+                    print('Image size after: 1')
                     actions += [State(layer_type='gap',
                                       layer_depth=state.layer_depth + 1,
                                       filter_depth=0,
@@ -131,10 +142,12 @@ class StateEnumerator:
                                       fc_size=0,
                                       terminate=0)]
 
-                # pool states -- iterate through all possible filter sizes and strides
+                # print('# pool states -- iterate through all possible filter sizes and strides')
+                # print('State'+state.layer_type)
                 if (state.layer_type in ['conv'] or
                         (state.layer_type == 'pool' and self.ssp.allow_consecutive_pooling) or
                         (state.layer_type == 'start' and self.ssp.allow_initial_pooling)):
+                    # print("Image Size before: "+str(state.image_size))
                     for filt in self._possible_pool_sizes(state.image_size):
                         for stride in self._possible_pool_strides(filt):
                             actions += [State(layer_type='pool',
@@ -147,10 +160,13 @@ class StateEnumerator:
                                               terminate=0)]
 
                 # FC States -- iterate through all possible fc sizes
+                # print('# FC States -- iterate through all possible fc sizes')
+                # print('State '+state.layer_type)
                 if (self.ssp.allow_fully_connected(state.image_size)
                         and state.layer_type in ['start', 'conv', 'pool']):
 
                     for fc_size in self._possible_fc_size(state):
+                        # print("Image Size : "+str(fc_size))
                         actions += [State(layer_type='fc',
                                           layer_depth=state.layer_depth + 1,
                                           filter_depth=0,
@@ -160,7 +176,8 @@ class StateEnumerator:
                                           fc_size=fc_size,
                                           terminate=0)]
 
-                # FC -> FC States
+                # print('# FC -> FC States')
+                # print('State '+state.layer_type)
                 if state.layer_type == 'fc' and state.filter_depth < self.ssp.max_fc - 1:
                     for fc_size in self._possible_fc_size(state):
                         actions += [State(layer_type='fc',
@@ -179,7 +196,7 @@ class StateEnumerator:
 
     def transition_to_action(self, start_state, to_state):
         action = to_state.copy()
-        if to_state.layer_type not in ['fc', 'gap']:
+        if to_state.layer_type not in ['fc', 'gap', 'pool']:
             action.image_size = start_state.image_size
         return action
 

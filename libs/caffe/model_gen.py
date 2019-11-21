@@ -51,7 +51,7 @@ class ModelGen:
 
         else:
             for epoch, number_decays in self.hp.STEP_LIST:
-                step = epoch * self.hp.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN / self.hp.TRAIN_BATCH_SIZE
+                step = epoch * self.hp.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN // self.hp.TRAIN_BATCH_SIZE
                 for j in range(number_decays):
                     solver_proto += '\nstepvalue: %i' % (step + j)
             
