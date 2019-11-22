@@ -137,7 +137,7 @@ def start_reactor(clientname, hostname, model, gpu_to_use, debug):
 
     if gpu_to_use is not None:
         print('GPU TO USE', gpu_to_use)
-        _model.hyper_parameters.CHECKPOINT_DIR = _model.hyper_parameters.CHECKPOINT_DIR + str(gpu_to_use)
+        _model.hyper_parameters.CHECKPOINT_DIR = _model.hyper_parameters.CHECKPOINT_DIR + str(clientname)
 
     f = QFactory(clientname, _model.hyper_parameters, _model.state_space_parameters, gpu_to_use, debug)
     reactor.connectTCP(hostname, 8000, f)
