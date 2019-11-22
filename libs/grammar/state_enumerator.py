@@ -190,7 +190,7 @@ class StateEnumerator:
                                           terminate=0)]
 
         # Add states to transition and q_value dictionary
-        q_values[state.as_tuple()] = {'actions': [self.bucket_state_tuple(to_state.as_tuple()) for to_state in actions],
+        q_values[self.bucket_state_tuple(state.as_tuple())] = {'actions': [self.bucket_state_tuple(to_state.as_tuple()) for to_state in actions],
                                       'utilities': [self.ssp.init_utility for i in range(len(actions))]}
         return q_values
 

@@ -211,7 +211,7 @@ class QLearner:
     def _transition_q_learning(self):
         ''' Updates self.state according to an epsilon-greedy strategy'''
         if self.bucketed_state.as_tuple() not in self.qstore.q:
-            self.enum.enumerate_state(self.bucketed_state, self.qstore.q)
+            self.enum.enumerate_state(self.state, self.qstore.q)
 
         action_values = self.qstore.q[self.bucketed_state.as_tuple()]
         # epsilon greedy choice
