@@ -262,9 +262,9 @@ def get_svhn_full(save_dir=None, root_path=None):
 
 def load_cifar100_data(filename):
     with open(filename, 'rb') as f:
-        datadict = pickle.load(f)
-        data = datadict['data']
-        labels = datadict['fine_labels']
+        datadict = pickle.load(f, encoding='bytes')
+        data = datadict[b'data']
+        labels = datadict[b'fine_labels']
         N = len(labels)
         data = data.reshape((N, 3, 32, 32))
         labels = np.array(labels)

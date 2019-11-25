@@ -162,7 +162,7 @@ class StateEnumerator:
                 # FC States -- iterate through all possible fc sizes
                 # print('# FC States -- iterate through all possible fc sizes')
                 # print('State '+state.layer_type)
-                if (self.ssp.allow_fully_connected(state.image_size)
+                if (self.ssp.allow_fully_connected(self.ssp.image_size_bucket(state.image_size))
                         and state.layer_type in ['start', 'conv', 'pool']):
 
                     for fc_size in self._possible_fc_size(state):

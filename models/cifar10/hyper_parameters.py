@@ -19,7 +19,7 @@ NUM_ITER_TO_TRY_LR = NUM_ITER_PER_EPOCH_TRAIN                                   
                                                                                     # Please make an integer multiple of NUM_ITER_PER_EPOCH_TRAIN
 
 TEST_INTERVAL_EPOCHS = 1                                                            # Num epochs to test on, should really always be 1                                      
-MAX_EPOCHS = 5                                                                     # Max number of epochs to train model
+MAX_EPOCHS = 20                                                                     # Max number of epochs to train model
 MAX_STEPS = MAX_EPOCHS * NUM_ITER_PER_EPOCH_TRAIN                                   
 
 

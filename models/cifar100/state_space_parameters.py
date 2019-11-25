@@ -1,13 +1,13 @@
-output_states = 10                                                                          # Number of Classes
-image_size = 28                                                                             # Size of images before they enter network (or smallest dimension of image)
+output_states = 100                                                                          # Number of Classes
+image_size = 32                                                                             # Size of images before they enter network (or smallest dimension of image)
 
-layer_limit = 12                                                                            # Max number of layers
+layer_limit = 18                                                                            # Max number of layers
 
 # Transition Options
 possible_conv_depths = [64, 128, 256, 512]                                                  # Choices for number of filters in a convolutional layer
 possible_conv_sizes = [1,3,5]                                                               # Choices for kernel size (square)
 possible_pool_sizes = [5, 3, 2]                                                 # Choices for [kernel size, stride] for a max pooling layer
-possible_pool_strides = [3,2,2]
+possible_pool_strides = [3, 2, 2]                                     # Choices for [kernel size, stride] for a max pooling layer
 max_fc = 2                                                                                  # Maximum number of fully connected layers (excluding final FC layer for softmax output)
 possible_fc_sizes = [i for i in [512, 256, 128] if i >= output_states]                      # Possible number of neurons in a fully connected layer
 

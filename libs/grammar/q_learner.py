@@ -223,10 +223,10 @@ class QLearner:
             max_actions = [action_values['actions'][i] for i in max_q_indexes]
             action = se.State(state_list=max_actions[np.random.randint(len(max_actions))])
 
-        print("Transitioning from "+str(self.state.as_tuple())+" ("+str(self.bucketed_state.as_tuple())+") with action "+str(action.as_tuple()))
+        #print("Transitioning from "+str(self.state.as_tuple())+" ("+str(self.bucketed_state.as_tuple())+") with action "+str(action.as_tuple()))
         self.state = self.enum.state_action_transition(self.state, action)
         self.bucketed_state = self.enum.bucket_state(self.state)
-        print("New state "+str(self.bucketed_state.as_tuple()))
+        #print("New state "+str(self.bucketed_state.as_tuple()))
 
         self._post_transition_updates()
 
@@ -247,7 +247,7 @@ class QLearner:
             state_list = self.stringutils.remove_drop_out_states(state_list)
 
             # Convert States so they are bucketed
-            state_list = [self.enum.bucket_state(state) for state in state_list]
+            # state_list = [self.enum.bucket_state(state) for state in state_list]
 
             self.update_q_value_sequence(state_list, self.accuracy_to_reward(accuracy_best_val))
 
@@ -264,36 +264,37 @@ class QLearner:
     def _update_q_value(self, start_state, to_state, reward):
         ''' Update a single Q-Value for start_state given the state we transitioned to and the reward. '''
 
-        print("Start state:")
-        print(start_state.as_tuple())
-        print("Target state:")
-        print(to_state.as_tuple())
+        #print("Start state:")
+        #print(start_state.as_tuple())
+        #print("Target state:")
+        #print(to_state.as_tuple())
+        bucketed_start_state = self.enum.bucket_state(start_state)
+        bucketed_to_state = self.enum.bucket_state(to_state)
+        #print("Bucketed Start state: ")
+        #print(bucketed_start_state.as_tuple())
+        #print("Bucketed Target state: ")
+        #print(bucketed_to_state.as_tuple())
 
-        if start_state.as_tuple() not in self.qstore.q:
+        if bucketed_start_state.as_tuple() not in self.qstore.q:
             self.enum.enumerate_state(start_state, self.qstore.q)
-        if to_state.as_tuple() not in self.qstore.q:
+        if bucketed_to_state.as_tuple() not in self.qstore.q:
             self.enum.enumerate_state(to_state, self.qstore.q)
 
 
-        actions = self.qstore.q[start_state.as_tuple()]['actions']
-        values = self.qstore.q[start_state.as_tuple()]['utilities']
 
-        max_over_next_states = max(self.qstore.q[to_state.as_tuple()]['utilities']) if to_state.terminate != 1 else 0
+        actions = self.qstore.q[bucketed_start_state.as_tuple()]['actions']
+        values = self.qstore.q[bucketed_start_state.as_tuple()]['utilities']
 
-        action_between_states = self.enum.transition_to_action(start_state, to_state).as_tuple()
+        max_over_next_states = max(self.qstore.q[bucketed_to_state.as_tuple()]['utilities']) if bucketed_to_state.terminate != 1 else 0
+
+        action_between_states = self.enum.transition_to_action(bucketed_start_state, bucketed_to_state).as_tuple()
+        print(actions)
 
         # Q_Learning update rule
-        print(actions)
-        print(action_between_states)
-
-        if action_between_states not in actions:
-            if action_between_states[0] != 'pool':
-                print("Not in dict while being:"+action_between_states[0])
-
         values[actions.index(action_between_states)] = values[actions.index(action_between_states)] + \
                                                 self.state_space_parameters.learning_rate * (reward + self.state_space_parameters.discount_factor * max_over_next_states - values[actions.index(action_between_states)])
 
-        self.qstore.q[start_state.as_tuple()] = {'actions': actions, 'utilities': values}
+        self.qstore.q[bucketed_start_state.as_tuple()] = {'actions': actions, 'utilities': values}
 
     
 
