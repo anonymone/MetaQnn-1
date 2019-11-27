@@ -485,3 +485,59 @@ def get_food_101():
     print('Ytest shape', y_test.shape)
 
     return x_train, y_train, x_validation, y_validation, x_test, y_test
+
+
+def load_stl_10(path):
+    stl_10_images = [os.path.join(path, filename) for filename in ['train_X.bin', 'test_X.bin']]
+    stl_10_labels = [os.path.join(path, filename) for filename in ['train_y.bin', 'test_y.bin']]
+
+    with open(stl_10_images[0], 'rb') as file:
+        x_train = np.transpose(np.reshape(np.fromfile(file, dtype=np.uint8), (-1, 3, 96, 96)), (0, 3, 2, 1))
+    with open(stl_10_labels[0], 'rb') as file:
+        y_train = np.fromfile(file, dtype=np.uint8)
+    with open(stl_10_images[1], 'rb') as file:
+        x_test = np.transpose(np.reshape(np.fromfile(file, dtype=np.uint8), (-1, 3, 96, 96)), (0, 3, 2, 1))
+    with open(stl_10_labels[1], 'rb') as file:
+        y_test = np.fromfile(file, dtype=np.uint8)
+
+    return x_train, y_train, x_test, y_test
+
+
+def get_stl_10(save_dir=None, root_path=None):
+    ''' If root_path is None, we download the data set from internet.
+
+        Either save path or root path must not be None and not both.
+
+        Returns Xtr, Ytr, Xte, Yte as numpy arrays
+    '''
+
+    assert ((save_dir is not None and root_path is None) or (save_dir is None and root_path is not None))
+
+    if root_path is None:
+        print('Downloading STL-10 dataset...')
+        data_url = "http://ai.stanford.edu/~acoates/stl10/stl10_binary.tar.gz"
+        filename = data_url.split('/')[-1]
+        filepath = os.path.join(save_dir, filename)
+        filepath, _ = urllib.request.urlretrieve(data_url, filepath)
+        print('Download Done, Extracting... [%s]' % filename)
+        tarfile.open(filepath, 'r:gz').extractall(save_dir)
+
+    if root_path is None:
+        x_train, y_train, x_test, y_test = load_stl_10(os.path.join(save_dir, "stl10_binary"))
+    else:
+        x_train, y_train, x_test, y_test = load_stl_10(os.path.join(root_path, "stl10_binary"))
+
+    # resize images
+    x_train = np.array([cv2.resize(img, dsize=(32, 32)) for img in x_train])
+    x_test = np.array([cv2.resize(img, dsize=(32, 32)) for img in x_test])
+
+    # format dataset to channels x height x width
+    x_train = np.rollaxis(x_train, 3, 1)
+    x_test = np.rollaxis(x_test, 3, 1)
+
+    print('Xtrain shape', x_train.shape)
+    print('Ytrain shape', y_train.shape)
+    print('Xtest shape', x_test.shape)
+    print('Ytest shape', y_test.shape)
+
+    return x_train, y_train, x_test, y_test
