@@ -1,7 +1,3 @@
-import math
-import numpy as np
-from operator import itemgetter
-from . import cnn
 from . import state_enumerator as se
 
 class StateStringUtils:

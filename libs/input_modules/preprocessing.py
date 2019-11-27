@@ -1,7 +1,6 @@
-import pandas as pd
 import numpy as np
 from scipy import misc
-from shutil import copyfile, rmtree
+from shutil import rmtree
 import argparse
 import os
 import cv2
