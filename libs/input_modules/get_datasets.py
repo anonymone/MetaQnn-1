@@ -1,4 +1,3 @@
-import gzip
 import os
 import pickle
 import ssl
@@ -115,7 +114,7 @@ def get_cifar10(save_dir=None, root_path=None):
     if root_path is None:
         print('Downloading CIFAR10 dataset...')
         tar_path = os.path.join(save_dir, "cifar-10-python.tar.gz")
-        url = urllib.request.URLopener()
+        url = urlopen()
         url.retrieve("https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz", tar_path)
         print('Download Done, Extracting...')
         tar = tarfile.open(tar_path)
@@ -170,7 +169,7 @@ def get_cifar100(save_dir=None, root_path=None):
     if root_path is None:
         print('Downloading CIFAR100 dataset...')
         tar_path = os.path.join(save_dir, "cifar-100-python.tar.gz")
-        url = urllib.request.URLopener()
+        url = urlopen()
         url.retrieve("https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz", tar_path)
         print('Download Done, Extracting...')
         tar = tarfile.open(tar_path)
@@ -232,7 +231,7 @@ def get_mnist(save_dir=None, root_path=None):
             out_file = os.path.join(save_dir, "%s" % fname)
             tar_path = os.path.join(save_dir, "%s.gz" % fname)
             out_mnist_files.append(out_file)
-            url = urllib.request.URLopener()
+            url = urlopen()
             url.retrieve("http://yann.lecun.com/exdb/mnist/%s.gz" % fname, tar_path)
             print('Download Done, Extracting... [%s]' % tar_path)
             os.system('gunzip -f %s' % tar_path)
@@ -265,7 +264,7 @@ def get_svhn(save_dir=None, root_path=None):
             os.mkdir(new_save_dir)
         train_mat = os.path.join(new_save_dir, "train_32x32.mat")
         test_mat = os.path.join(new_save_dir, "test_32x32.mat")
-        url = urllib.request.URLopener()
+        url = urlopen()
 
         print('Downloading Svhn Train...')
         url.retrieve("http://ufldl.stanford.edu/housenumbers/train_32x32.mat", train_mat)
@@ -345,7 +344,7 @@ def get_svhn_full(save_dir=None, root_path=None):
         if not os.path.isdir(new_save_dir):
             os.mkdir(new_save_dir)
         extra_mat = os.path.join(new_save_dir, "extra_32x32.mat")
-        url = urllib.request.URLopener()
+        url = urlopen()
 
         print('Downloading Svhn Extra...')
         url.retrieve("http://ufldl.stanford.edu/housenumbers/extra_32x32.mat", extra_mat)
