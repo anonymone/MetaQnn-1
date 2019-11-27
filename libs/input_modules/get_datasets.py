@@ -32,10 +32,9 @@ def get_image(file_in, row=28, col=28):
     return out_image
 
 
-def get_caltech101(save_dir=None, root_path=None):
-    assert ((save_dir is not None and root_path is None) or (save_dir is None and root_path is not None))
-
-    if root_path is None:
+def get_caltech101(save_dir):
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
         ctx = ssl.create_default_context()
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
@@ -49,7 +48,7 @@ def get_caltech101(save_dir=None, root_path=None):
         tar.extractall(save_dir)
         tar.close()
 
-    root = os.path.join(save_dir, "101_ObjectCategories") if not root_path else root_path
+    root = os.path.join(save_dir, "101_ObjectCategories")
 
     train_x = []
     train_y = []
@@ -103,17 +102,9 @@ def load_CIFAR_batch(filename):
         return X, Y
 
 
-def get_cifar10(save_dir=None, root_path=None):
-    ''' If root_path is None, we download the data set from internet.
-
-        Either save path or root path must not be None and not both.
-
-        Returns Xtr, Ytr, Xte, Yte as numpy arrays
-    '''
-
-    assert ((save_dir is not None and root_path is None) or (save_dir is None and root_path is not None))
-
-    if root_path is None:
+def get_cifar10(save_dir):
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
         print('Downloading CIFAR10 dataset...')
         tar_path = os.path.join(save_dir, "cifar-10-python.tar.gz")
         url = urllib.request.URLopener()
@@ -123,7 +114,7 @@ def get_cifar10(save_dir=None, root_path=None):
         tar.extractall(save_dir)
         tar.close()
 
-    root = os.path.join(save_dir, "cifar-10-batches-py") if not root_path else root_path
+    root = os.path.join(save_dir, "cifar-10-batches-py")
 
     # Training Data
     xs = []
@@ -158,17 +149,9 @@ def load_cifar100_data(filename):
         return data, labels
 
 
-def get_cifar100(save_dir=None, root_path=None):
-    ''' If root_path is None, we download the data set from internet.
-
-        Either save path or root path must not be None and not both.
-
-        Returns Xtr, Ytr, Xte, Yte as numpy arrays
-    '''
-
-    assert ((save_dir is not None and root_path is None) or (save_dir is None and root_path is not None))
-
-    if root_path is None:
+def get_cifar100(save_dir):
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
         print('Downloading CIFAR100 dataset...')
         tar_path = os.path.join(save_dir, "cifar-100-python.tar.gz")
         url = urllib.request.URLopener()
@@ -178,7 +161,7 @@ def get_cifar100(save_dir=None, root_path=None):
         tar.extractall(save_dir)
         tar.close()
 
-    root = os.path.join(save_dir, "cifar-100-python") if not root_path else root_path
+    root = os.path.join(save_dir, "cifar-100-python")
 
     Xtr, Ytr = load_cifar100_data(os.path.join(root, 'train'))
     Xte, Yte = load_cifar100_data(os.path.join(root, 'test'))
@@ -214,27 +197,18 @@ def load_mnist(image_fname, label_fname):
     return X, np.asarray(Y)
 
 
-def get_mnist(save_dir=None, root_path=None):
-    ''' If root_path is None, we download the data set from internet.
-
-        Either save path or root path must not be None and not both.
-
-        Returns Xtr, Ytr, Xte, Yte as numpy arrays
-    '''
-
-    assert ((save_dir is not None and root_path is None) or (save_dir is None and root_path is not None))
-
+def get_mnist(save_dir):
     mnist_files = ['train-images-idx3-ubyte', 'train-labels-idx1-ubyte',
                    't10k-images-idx3-ubyte', 't10k-labels-idx1-ubyte']
-    out_mnist_files = []
-    if root_path is None:
+    out_mnist_files = [os.path.join(save_dir, "%s" % filename) for filename in mnist_files]
+
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
         print('Downloading MNIST dataset...')
-        for fname in mnist_files:
-            out_file = os.path.join(save_dir, "%s" % fname)
-            tar_path = os.path.join(save_dir, "%s.gz" % fname)
-            out_mnist_files.append(out_file)
+        for filename in mnist_files:
+            tar_path = os.path.join(save_dir, "%s.gz" % filename)
             url = urllib.request.URLopener()
-            url.retrieve("http://yann.lecun.com/exdb/mnist/%s.gz" % fname, tar_path)
+            url.retrieve("http://yann.lecun.com/exdb/mnist/%s.gz" % filename, tar_path)
             print('Download Done, Extracting... [%s]' % tar_path)
             os.system('gunzip -f %s' % tar_path)
 
@@ -250,30 +224,19 @@ def get_mnist(save_dir=None, root_path=None):
     return Xtr, Ytr, Xte, Yte
 
 
-def get_svhn(save_dir=None, root_path=None):
-    ''' If root_path is None, we download the data set from internet.
-
-        Either save path or root path must not be None and not both.
-
-        Returns Xtr, Ytr, Xte, Yte as numpy arrays
-    '''
-
-    assert ((save_dir is not None and root_path is None) or (save_dir is None and root_path is not None))
-
-    if root_path is None:
-        new_save_dir = os.path.join(save_dir, 'og_data')
-        if not os.path.isdir(new_save_dir):
-            os.mkdir(new_save_dir)
-        train_mat = os.path.join(new_save_dir, "train_32x32.mat")
-        test_mat = os.path.join(new_save_dir, "test_32x32.mat")
+def get_svhn(save_dir):
+    root = os.path.join(save_dir, 'og_data')
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
+        if not os.path.isdir(root):
+            os.mkdir(root)
+        train_mat = os.path.join(root, "train_32x32.mat")
+        test_mat = os.path.join(root, "test_32x32.mat")
         url = urllib.request.URLopener()
-
         print('Downloading Svhn Train...')
         url.retrieve("http://ufldl.stanford.edu/housenumbers/train_32x32.mat", train_mat)
         print('Downloading Svhn Test...')
         url.retrieve("http://ufldl.stanford.edu/housenumbers/test_32x32.mat", test_mat)
-
-    root = new_save_dir if not root_path else root_path
 
     train = io.loadmat(os.path.join(root, 'train_32x32.mat'))
     Xtr = train['X']
@@ -298,9 +261,8 @@ def get_svhn(save_dir=None, root_path=None):
     return Xtr, Ytr, Xte, Yte
 
 
-def get_svhn_small(save_dir=None, root_path=None):
-    assert ((save_dir is not None and root_path is None) or (save_dir is None and root_path is not None))
-    Xtr, Ytr, Xte, Yte = get_svhn(save_dir, root_path)
+def get_svhn_small(save_dir):
+    Xtr, Ytr, Xte, Yte = get_svhn(save_dir)
 
     val_x = []
     val_y = []
@@ -329,29 +291,17 @@ def get_svhn_small(save_dir=None, root_path=None):
     return Xtr, Ytr, Xval, Yval, Xte, Yte
 
 
-def get_svhn_full(save_dir=None, root_path=None):
-    ''' If root_path is None, we download the data set from internet.
+def get_svhn_full(save_dir):
+    Xtr_small, Ytr_small, Xte, Yte = get_svhn(save_dir)
 
-        Either save path or root path must not be None and not both.
-
-        Returns Xtr, Ytr, Xte, Yte as numpy arrays
-    '''
-
-    assert ((save_dir is not None and root_path is None) or (save_dir is None and root_path is not None))
-
-    Xtr_small, Ytr_small, Xte, Yte = get_svhn(save_dir, root_path)
-
-    if root_path is None:
-        new_save_dir = os.path.join(save_dir, 'og_data')
-        if not os.path.isdir(new_save_dir):
-            os.mkdir(new_save_dir)
-        extra_mat = os.path.join(new_save_dir, "extra_32x32.mat")
+    root = os.path.join(save_dir, 'og_data')
+    extra_mat = os.path.join(root, "extra_32x32.mat")
+    if not os.path.exists(extra_mat):
+        extra_mat = os.path.join(root, "extra_32x32.mat")
         url = urllib.request.URLopener()
-
         print('Downloading Svhn Extra...')
         url.retrieve("http://ufldl.stanford.edu/housenumbers/extra_32x32.mat", extra_mat)
 
-    root = new_save_dir if not root_path else root_path
     extra = io.loadmat(os.path.join(root, 'extra_32x32.mat'))
     Xtr_extra = extra['X']
     Ytr_extra = extra['y']
@@ -388,9 +338,11 @@ def get_svhn_full(save_dir=None, root_path=None):
     return Xtr, Ytr, Xval, Yval, Xte, Yte
 
 
-def get_fashion_mnist():
-    dataset_train = tfds.as_numpy(tfds.load(name="fashion_mnist", split=tfds.Split.TRAIN, batch_size=-1))
-    dataset_test = tfds.as_numpy(tfds.load(name="fashion_mnist", split=tfds.Split.TEST, batch_size=-1))
+def get_fashion_mnist(save_dir):
+    dataset_train = tfds.as_numpy(
+        tfds.load(name="fashion_mnist", data_dir=save_dir, split=tfds.Split.TRAIN, batch_size=-1))
+    dataset_test = tfds.as_numpy(
+        tfds.load(name="fashion_mnist", data_dir=save_dir, split=tfds.Split.TEST, batch_size=-1))
 
     x_train, y_train = dataset_train["image"], dataset_train["label"]
     x_test, y_test = dataset_test["image"], dataset_test["label"]
@@ -407,10 +359,13 @@ def get_fashion_mnist():
     return x_train, y_train, x_test, y_test
 
 
-def get_flowers_102():
-    dataset_train = tfds.as_numpy(tfds.load(name="oxford_flowers102", split=tfds.Split.TRAIN, batch_size=-1))
-    dataset_validation = tfds.as_numpy(tfds.load(name="oxford_flowers102", split=tfds.Split.VALIDATION, batch_size=-1))
-    dataset_test = tfds.as_numpy(tfds.load(name="oxford_flowers102", split=tfds.Split.TEST, batch_size=-1))
+def get_flowers_102(save_dir):
+    dataset_train = tfds.as_numpy(
+        tfds.load(name="oxford_flowers102", data_dir=save_dir, split=tfds.Split.TRAIN, batch_size=-1))
+    dataset_validation = tfds.as_numpy(
+        tfds.load(name="oxford_flowers102", data_dir=save_dir, split=tfds.Split.VALIDATION, batch_size=-1))
+    dataset_test = tfds.as_numpy(
+        tfds.load(name="oxford_flowers102", data_dir=save_dir, split=tfds.Split.TEST, batch_size=-1))
 
     x_train, y_train = dataset_train["image"], dataset_train["label"]
     x_validation, y_validation = dataset_validation["image"], dataset_validation["label"]
@@ -436,8 +391,8 @@ def get_flowers_102():
     return x_train, y_train, x_validation, y_validation, x_test, y_test
 
 
-def get_flowers_5():
-    dataset = tfds.as_numpy(tfds.load(name="tf_flowers", split=tfds.Split.TRAIN, batch_size=-1))
+def get_flowers_5(save_dir):
+    dataset = tfds.as_numpy(tfds.load(name="tf_flowers", data_dir=save_dir, split=tfds.Split.TRAIN, batch_size=-1))
     x, y = dataset["image"], dataset["label"]
 
     # resize images
@@ -460,8 +415,8 @@ def get_flowers_5():
     return x_train, y_train, x_validation, y_validation, x_test, y_test
 
 
-def get_food_101():
-    dataset = tfds.as_numpy(tfds.load("food101", split=tfds.Split.TRAIN))
+def get_food_101(save_dir):
+    dataset = tfds.as_numpy(tfds.load("food101", data_dir=save_dir, split=tfds.Split.TRAIN))
     x = []
     y = []
     for example in dataset:
@@ -503,17 +458,9 @@ def load_stl_10(path):
     return x_train, y_train, x_test, y_test
 
 
-def get_stl_10(save_dir=None, root_path=None):
-    ''' If root_path is None, we download the data set from internet.
-
-        Either save path or root path must not be None and not both.
-
-        Returns Xtr, Ytr, Xte, Yte as numpy arrays
-    '''
-
-    assert ((save_dir is not None and root_path is None) or (save_dir is None and root_path is not None))
-
-    if root_path is None:
+def get_stl_10(save_dir):
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
         print('Downloading STL-10 dataset...')
         data_url = "http://ai.stanford.edu/~acoates/stl10/stl10_binary.tar.gz"
         filename = data_url.split('/')[-1]
@@ -522,10 +469,7 @@ def get_stl_10(save_dir=None, root_path=None):
         print('Download Done, Extracting... [%s]' % filename)
         tarfile.open(filepath, 'r:gz').extractall(save_dir)
 
-    if root_path is None:
-        x_train, y_train, x_test, y_test = load_stl_10(os.path.join(save_dir, "stl10_binary"))
-    else:
-        x_train, y_train, x_test, y_test = load_stl_10(os.path.join(root_path, "stl10_binary"))
+    x_train, y_train, x_test, y_test = load_stl_10(os.path.join(save_dir, "stl10_binary"))
 
     # resize images
     x_train = np.array([cv2.resize(img, dsize=(32, 32)) for img in x_train])
@@ -541,3 +485,4 @@ def get_stl_10(save_dir=None, root_path=None):
     print('Ytest shape', y_test.shape)
 
     return x_train, y_train, x_test, y_test
+

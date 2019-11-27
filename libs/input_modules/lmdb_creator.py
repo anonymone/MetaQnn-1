@@ -64,10 +64,10 @@ def shuffle(X, y):
     return X[new_index, :, :, :], y[new_index]
 
 
-def create_records(Xtr,
-                   Ytr,
-                   Xte,
-                   Yte,
+def create_records(x_train,
+                   y_train,
+                   x_test,
+                   y_test,
                    root_path,
                    number_val=0,
                    per_image_fn=None,
@@ -75,54 +75,54 @@ def create_records(Xtr,
                    mean_subtraction=False,
                    save_as_float=False,
                    pad=0,
-                   Xval=None,
-                   Yval=None):
-    ''' Splits Xtr in validation and train sets. Also saves a full train lmdb.
+                   x_validation=None,
+                   y_validation=None):
+    ''' Splits x_train in validation and train sets. Also saves a full train lmdb.
         full train and split train are both first shuffled before being saved
 
-        If both Xval is not None AND number_val > 0, we create a new validation set from Xtr combined with Xval
+        If both x_validation is not None AND number_val > 0, we create a new validation set from x_train combined with x_validation
     '''
-    print('Labels train', np.unique(Ytr))
-    print('Labels test', np.unique(Yte))
+    print('Labels train', np.unique(y_train))
+    print('Labels test', np.unique(y_test))
 
     if save_as_float:
         print('Converting to Float')
-        Xtr = Xtr.astype(float)
-        Ytr = Ytr.astype(float)
-        Xte = Xte.astype(float)
-        Yte = Yte.astype(float)
-        if Xval is not None:
-            Xval = Xval.astype(float)
-            Yval = Yval.astype(float)
+        x_train = x_train.astype(float)
+        y_train = y_train.astype(float)
+        x_test = x_test.astype(float)
+        y_test = y_test.astype(float)
+        if x_validation is not None:
+            x_validation = x_validation.astype(float)
+            y_validation = y_validation.astype(float)
 
     if per_image_fn is not None:
         print('Applying ' + per_image_fn.__name__ + ' to training set')
-        for i in range(Xtr.shape[0]):
-            Xtr[i] = per_image_fn(Xtr[i].T).T
+        for i in range(x_train.shape[0]):
+            x_train[i] = per_image_fn(x_train[i].T).T
         print('Applying ' + per_image_fn.__name__ + ' to testing set')
-        for i in range(Xte.shape[0]):
-            Xte[i] = per_image_fn(Xte[i].T).T
-        if Xval is not None:
+        for i in range(x_test.shape[0]):
+            x_test[i] = per_image_fn(x_test[i].T).T
+        if x_validation is not None:
             print('Applying ' + per_image_fn.__name__ + ' to validation set')
-            for i in range(Xval.shape[0]):
-                Xval[i] = per_image_fn(Xval[i].T).T
+            for i in range(x_validation.shape[0]):
+                x_validation[i] = per_image_fn(x_validation[i].T).T
 
-    if Xval is not None:
-        train_x = Xtr.copy()
-        train_y = Ytr.copy()
-        val_x = Xval.copy()
-        val_y = Yval.copy()
-        Xtr = np.concatenate([Xtr, Xval])
-        Ytr = np.concatenate([Ytr, Yval])
+    if x_validation is not None:
+        train_x = x_train.copy()
+        train_y = y_train.copy()
+        val_x = x_validation.copy()
+        val_y = y_validation.copy()
+        x_train = np.concatenate([x_train, x_validation])
+        y_train = np.concatenate([y_train, y_validation])
 
     if number_val:
         train_x = []
         train_y = []
         val_x = []
         val_y = []
-        for i in np.unique(Ytr):
-            X_label = Xtr[Ytr == i].copy()
-            proportion = float(X_label.shape[0]) / Xtr.shape[0]
+        for i in np.unique(y_train):
+            X_label = x_train[y_train == i].copy()
+            proportion = float(X_label.shape[0]) / x_train.shape[0]
             divide = int(round(proportion * number_val))
 
             # Deal with wierd rounding error
@@ -140,7 +140,7 @@ def create_records(Xtr,
         val_y = np.concatenate(val_y)
         assert (val_x.shape[0] == number_val)
 
-    if Xval is not None or number_val > 0:
+    if x_validation is not None or number_val > 0:
 
         train_x, train_y = shuffle(train_x, train_y)
 
@@ -173,55 +173,51 @@ def create_records(Xtr,
         create_record(val_x, val_y, os.path.join(root_path, 'val.lmdb'), save_as_float=save_as_float)
         del train_x, train_y, val_x, val_y
 
-    Xtr, Ytr = shuffle(Xtr, Ytr)
+    x_train, y_train = shuffle(x_train, y_train)
 
     if gcn:
-        print('Train Small Before GCN Mean, std ', np.mean(Xtr), np.std(Xtr))
-        print('Test Before GCN mean, std', np.mean(Xte), np.std(Xte))
-        Xtr, Xte = preprocessing.gcn_whiten(Xtr, Xte)
-        print('Train Mean, std: ', np.mean(Xtr), np.std(Xtr))
-        print('Test Mean, std: ', np.mean(Xte), np.std(Xte))
+        print('Train Small Before GCN Mean, std ', np.mean(x_train), np.std(x_train))
+        print('Test Before GCN mean, std', np.mean(x_test), np.std(x_test))
+        x_train, x_test = preprocessing.gcn_whiten(x_train, x_test)
+        print('Train Mean, std: ', np.mean(x_train), np.std(x_train))
+        print('Test Mean, std: ', np.mean(x_test), np.std(x_test))
 
     if mean_subtraction:
-        Xtr, Xte = preprocessing.mean_subtraction(Xtr, Xte)
-        print('Train Mean: ', np.mean(Xtr))
-        print('Test Mean: ', np.mean(Xte))
+        x_train, x_test = preprocessing.mean_subtraction(x_train, x_test)
+        print('Train Mean: ', np.mean(x_train))
+        print('Test Mean: ', np.mean(x_test))
 
     if pad:
         pad_value = 0 if gcn or mean_subtraction else 128
-        Xtr = add_padding(Xtr, pad, pad_value)
+        x_train = add_padding(x_train, pad, pad_value)
 
-    print('Train x shape', Xtr.shape, Xtr.dtype)
-    print('Train y shape', Ytr.shape, Ytr.dtype)
-    print('Test x shape', Xte.shape, Xte.dtype)
-    print('Test y shape', Yte.shape, Yte.dtype)
+    print('Train x shape', x_train.shape, x_train.dtype)
+    print('Train y shape', y_train.shape, y_train.dtype)
+    print('Test x shape', x_test.shape, x_test.dtype)
+    print('Test y shape', y_test.shape, y_test.dtype)
 
-    create_record(Xtr, Ytr, os.path.join(root_path, 'train_full.lmdb'), save_as_float=save_as_float)
-    create_record(Xte, Yte, os.path.join(root_path, 'test.lmdb'), save_as_float=save_as_float)
+    create_record(x_train, y_train, os.path.join(root_path, 'train_full.lmdb'), save_as_float=save_as_float)
+    create_record(x_test, y_test, os.path.join(root_path, 'test.lmdb'), save_as_float=save_as_float)
 
 
 def main():
     parser = argparse.ArgumentParser()
-    dataset_options = ['cifar10', 'cifar100', 'svhn', 'svhn_full', 'svhn_small', 'mnist', 'fashion_mnist', 'caltech101',
-                       'flowers102', 'food101', 'flower5', 'stl_10']
+    dataset_options = ['caltech101', 'cifar10', 'cifar100', 'svhn', 'svhn_full', 'svhn_small', 'mnist', 'fashion_mnist',
+                       'flowers102', 'food101', 'flower5', 'stl10']
     parser.add_argument('dataset', choices=dataset_options, help='Which data set')
-    parser.add_argument('root_save_dir', help='Where to save lmdb')
     parser.add_argument('-v', '--number_val', help='How many validation images', type=int, default=0)
-    parser.add_argument('-prep', '--preprocessing', help='Which per image prepocessing function to use', default=None,
+    parser.add_argument('-prep', '--preprocessing', help='Which per image preprocessing function to use', default=None,
                         choices=['lcn', 'standard_whiten'])
     parser.add_argument('-gcn', '--gcn', help='Whether to use global contrast normalization or not. Default is false',
                         default=False, type=bool)
     parser.add_argument('-ms', '--mean_subtraction', help='Do global mean subtraction?', default=False, type=bool)
-    parser.add_argument('-odd', '--original_data_dir', help='Folder where original data is stored')
     parser.add_argument('-pad', '--padding', help='Padding value on each side.', type=int, default=0)
 
     args = parser.parse_args()
-    if not os.path.isdir(args.root_save_dir):
-        os.makedirs(args.root_save_dir)
-
-    if args.original_data_dir and not os.path.isdir(args.original_data_dir):
-        print('ERROR: original data dir not real directory')
-        return
+    lmdb_directory = os.path.abspath('./' + args.dataset)
+    if not os.path.isdir(lmdb_directory):
+        os.makedirs(lmdb_directory)
+    dataset_directory = os.path.join(lmdb_directory, 'dataset')
 
     # Should we save as float?
     save_as_float = args.preprocessing is not 'none' or args.gcn or args.mean_subtraction
@@ -234,66 +230,60 @@ def main():
     else:
         per_image_fn = None
 
-    # Convert to absolute paths
-    root_save_dir = os.path.abspath(args.root_save_dir)
-
-    save_dir = root_save_dir if not args.original_data_dir else None
-    root_path = os.path.abspath(args.original_data_dir) if args.original_data_dir else None
     padding = args.padding if args.padding else 0
 
     if args.dataset == 'cifar10':
-        Xtr, Ytr, Xte, Yte = get_datasets.get_cifar10(save_dir=save_dir,
-                                                      root_path=root_path)
-        Xval, Yval = None, None
+        x_train, y_train, x_test, y_test = get_datasets.get_cifar10(save_dir=dataset_directory)
+        x_validation, y_validation = None, None
     elif args.dataset == 'cifar100':
-        Xtr, Ytr, Xte, Yte = get_datasets.get_cifar100(save_dir=save_dir,
-                                                       root_path=root_path)
-        Xval, Yval = None, None
+        x_train, y_train, x_test, y_test = get_datasets.get_cifar100(save_dir=dataset_directory)
+        x_validation, y_validation = None, None
     elif args.dataset == 'svhn':
-        Xtr, Ytr, Xte, Yte = get_datasets.get_svhn(save_dir=save_dir,
-                                                   root_path=root_path)
-        Xval, Yval = None, None
+        x_train, y_train, x_test, y_test = get_datasets.get_svhn(save_dir=dataset_directory)
+        x_validation, y_validation = None, None
     elif args.dataset == 'svhn_full':
-        Xtr, Ytr, Xval, Yval, Xte, Yte = get_datasets.get_svhn_full(save_dir=save_dir,
-                                                                    root_path=root_path)
+        x_train, y_train, x_validation, y_validation, x_test, y_test = get_datasets.get_svhn_full(
+            save_dir=dataset_directory)
     elif args.dataset == 'svhn_small':
-        Xtr, Ytr, Xval, Yval, Xte, Yte = get_datasets.get_svhn_small(save_dir=save_dir,
-                                                                     root_path=root_path)
+        x_train, y_train, x_validation, y_validation, x_test, y_test = get_datasets.get_svhn_small(
+            save_dir=dataset_directory)
     elif args.dataset == 'mnist':
-        Xtr, Ytr, Xte, Yte = get_datasets.get_mnist(save_dir=save_dir,
-                                                    root_path=root_path)
-        Xval, Yval = None, None
+        x_train, y_train, x_test, y_test = get_datasets.get_mnist(save_dir=dataset_directory)
+        x_validation, y_validation = None, None
     elif args.dataset == 'fashion_mnist':
-        Xtr, Ytr, Xte, Yte = get_datasets.get_fashion_mnist()
-        Xval, Yval = None, None
+        x_train, y_train, x_test, y_test = get_datasets.get_fashion_mnist(save_dir=dataset_directory)
+        x_validation, y_validation = None, None
     elif args.dataset == 'caltech101':
-        Xtr, Ytr, Xval, Yval = get_datasets.get_caltech101(save_dir=save_dir,
-                                                           root_path=root_path)
-        Xte, Yte = Xval.copy(), Yval.copy()
+        x_train, y_train, x_validation, y_validation = get_datasets.get_caltech101(save_dir=dataset_directory)
+        x_test, y_test = x_validation.copy(), y_validation.copy()
     elif args.dataset == 'flowers102':
-        Xtr, Ytr, Xval, Yval, Xte, Yte = get_datasets.get_flowers_102()
+        x_train, y_train, x_validation, y_validation, x_test, y_test = get_datasets.get_flowers_102(
+            save_dir=dataset_directory)
     elif args.dataset == 'flower5':
-        Xtr, Ytr, Xval, Yval, Xte, Yte = get_datasets.get_flowers_5()
+        x_train, y_train, x_validation, y_validation, x_test, y_test = get_datasets.get_flowers_5(
+            save_dir=dataset_directory)
     elif args.dataset == 'food101':
-        Xtr, Ytr, Xval, Yval, Xte, Yte = get_datasets.get_food_101()
-    elif args.dataset == 'stl_10':
-        Xtr, Ytr, Xte, Yte = get_datasets.get_stl_10(save_dir=save_dir,
-                                                     root_path=root_path)
-        Xval, Yval = None, None
+        x_train, y_train, x_validation, y_validation, x_test, y_test = get_datasets.get_food_101(
+            save_dir=dataset_directory)
+    elif args.dataset == 'stl10':
+        x_train, y_train, x_test, y_test = get_datasets.get_stl_10(save_dir=dataset_directory)
+        x_validation, y_validation = None, None
 
-    create_records(Xtr=Xtr,
-                   Ytr=Ytr,
-                   Xte=Xte,
-                   Yte=Yte,
-                   root_path=root_save_dir,
+    create_records(x_train=x_train,
+                   y_train=y_train,
+                   x_test=x_test,
+                   y_test=y_test,
+                   root_path=lmdb_directory,
                    number_val=args.number_val,
                    per_image_fn=per_image_fn,
                    gcn=args.gcn,
                    mean_subtraction=args.mean_subtraction,
                    save_as_float=save_as_float,
-                   pad=args.padding,
-                   Xval=Xval,
-                   Yval=Yval)
+                   pad=padding,
+                   x_validation=x_validation,
+                   y_validation=y_validation)
 
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()
+
