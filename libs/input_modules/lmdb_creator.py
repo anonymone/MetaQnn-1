@@ -8,22 +8,24 @@ import shutil
 import get_datasets
 import preprocessing
 
+
 def add_padding(data, pad, pad_value):
     if pad <= 0:
         return data
     print("Adding pads [%d]" % pad)
     shp = data.shape
-    padded = np.zeros((shp[0], shp[1], shp[2] + 2*pad, shp[3] + 2*pad))
-    padded[:,:,:,:] = pad_value
-    padded[:,:,pad:-pad,pad:-pad] = data
+    padded = np.zeros((shp[0], shp[1], shp[2] + 2 * pad, shp[3] + 2 * pad))
+    padded[:, :, :, :] = pad_value
+    padded[:, :, pad:-pad, pad:-pad] = data
     print(padded.shape)
     return padded
+
 
 def create_record(X, y, path, save_as_float=False):
     '''Creates a single LMDB file. Path is the full path of filename to store'''
 
-    assert(X.shape[0] == y.shape[0])
-    assert(y.min() == 0)
+    assert (X.shape[0] == y.shape[0])
+    assert (y.min() == 0)
     if os.path.isdir(path):
         print('removing ' + path)
         shutil.rmtree(path)
@@ -31,9 +33,9 @@ def create_record(X, y, path, save_as_float=False):
     N = X.shape[0]
 
     map_size = X.nbytes * 50
-  
+
     env = lmdb.open(path, map_size=map_size)
-    
+
     print('creating ' + path)
 
     with env.begin(write=True) as txn:
@@ -49,9 +51,10 @@ def create_record(X, y, path, save_as_float=False):
                 datum.data = X[i].tobytes()  # or .tostring() if numpy < 1.9
             datum.label = int(y[i])
             str_id = '{:08}'.format(i)
-    
+
             # The encode is only essential in Python 3
             txn.put(str_id.encode('ascii'), datum.SerializeToString())
+
 
 def shuffle(X, y):
     ''' X and y must be the same length vectors '''
@@ -127,20 +130,19 @@ def create_records(Xtr,
                 divide = number_val - np.concatenate(val_x).shape[0]
 
             val_x.append(X_label[:divide])
-            val_y.append([i]*divide)
+            val_y.append([i] * divide)
             train_x.append(X_label[divide:])
-            train_y.append([i]*(X_label.shape[0] - divide))
+            train_y.append([i] * (X_label.shape[0] - divide))
 
         train_x = np.concatenate(train_x)
         train_y = np.concatenate(train_y)
         val_x = np.concatenate(val_x)
         val_y = np.concatenate(val_y)
-        assert(val_x.shape[0] == number_val)
+        assert (val_x.shape[0] == number_val)
 
     if Xval is not None or number_val > 0:
 
         train_x, train_y = shuffle(train_x, train_y)
-
 
         if gcn:
             print('Train Small Before GCN Mean, std ', np.mean(train_x), np.std(train_x))
@@ -162,8 +164,10 @@ def create_records(Xtr,
         print('Train Small y shape', train_y.shape, train_y.dtype)
         print('Validation x shape', val_x.shape, val_x.dtype)
         print('Validation y shape', val_y.shape, val_y.dtype)
-        print('Biggest Class is %f of training set' % (np.unique(train_y, return_counts=True)[1].max()  / float(len(train_y))))
-        print('Biggest Class is %f of validation set' % (np.unique(val_y, return_counts=True)[1].max() / float(len(val_y))))
+        print('Biggest Class is %f of training set' % (
+                np.unique(train_y, return_counts=True)[1].max() / float(len(train_y))))
+        print('Biggest Class is %f of validation set' % (
+                np.unique(val_y, return_counts=True)[1].max() / float(len(val_y))))
 
         create_record(train_x, train_y, os.path.join(root_path, 'train.lmdb'), save_as_float=save_as_float)
         create_record(val_x, val_y, os.path.join(root_path, 'val.lmdb'), save_as_float=save_as_float)
@@ -201,9 +205,11 @@ def main():
     dataset_options = ['cifar10', 'cifar100', 'svhn', 'svhn_full', 'svhn_small', 'mnist', 'caltech101']
     parser.add_argument('dataset', choices=dataset_options, help='Which data set')
     parser.add_argument('root_save_dir', help='Where to save lmdb')
-    parser.add_argument('-v','--number_val', help='How many validation images', type=int, default=0)
-    parser.add_argument('-prep', '--preprocessing', help='Which per image prepocessing function to use', default=None, choices=['lcn', 'standard_whiten'])
-    parser.add_argument('-gcn', '--gcn', help='Whether to use global contrast normalization or not. Default is false', default=False, type=bool)
+    parser.add_argument('-v', '--number_val', help='How many validation images', type=int, default=0)
+    parser.add_argument('-prep', '--preprocessing', help='Which per image prepocessing function to use', default=None,
+                        choices=['lcn', 'standard_whiten'])
+    parser.add_argument('-gcn', '--gcn', help='Whether to use global contrast normalization or not. Default is false',
+                        default=False, type=bool)
     parser.add_argument('-ms', '--mean_subtraction', help='Do global mean subtraction?', default=False, type=bool)
     parser.add_argument('-odd', '--original_data_dir', help='Folder where original data is stored')
     parser.add_argument('-pad', '--padding', help='Padding value on each side.', type=int, default=0)
@@ -227,12 +233,12 @@ def main():
     else:
         per_image_fn = None
 
-    #Convert to absolute paths
+    # Convert to absolute paths
     root_save_dir = os.path.abspath(args.root_save_dir)
 
-    save_dir=root_save_dir if not args.original_data_dir else None
-    root_path=os.path.abspath(args.original_data_dir) if args.original_data_dir else None
-    padding = args.padding if args.padding else 0 
+    save_dir = root_save_dir if not args.original_data_dir else None
+    root_path = os.path.abspath(args.original_data_dir) if args.original_data_dir else None
+    padding = args.padding if args.padding else 0
 
     if args.dataset == 'cifar10':
         Xtr, Ytr, Xte, Yte = get_datasets.get_cifar10(save_dir=save_dir,
@@ -256,12 +262,17 @@ def main():
         Xtr, Ytr, Xte, Yte = get_datasets.get_mnist(save_dir=save_dir,
                                                     root_path=root_path)
         Xval, Yval = None, None
-
+    elif args.dataset == 'fashion_mnist':
+        Xtr, Ytr, Xte, Yte = get_datasets.get_fashion_mnist()
+        Xval, Yval = None, None
     elif args.dataset == 'caltech101':
         Xtr, Ytr, Xval, Yval = get_datasets.get_caltech101(save_dir=save_dir,
                                                            root_path=root_path)
         Xte = Xval.copy()
         Yte = Yval.copy()
+    elif args.dataset == "flowers-102":
+        Xtr, Ytr, Xval, Yval = get_datasets.get_flowers_102()
+        Xval, Yval = None, None
 
     create_records(Xtr=Xtr,
                    Ytr=Ytr,
@@ -276,5 +287,6 @@ def main():
                    pad=args.padding,
                    Xval=Xval,
                    Yval=Yval)
+
 
 if __name__ == "__main__": main()
