@@ -11,6 +11,7 @@ import numpy as np
 import cv2
 from scipy import io, misc
 
+from sklearn.model_selection import train_test_split
 import tensorflow_datasets as tfds
 
 
@@ -64,9 +65,7 @@ def get_caltech101(save_dir=None, root_path=None):
         cls_images = [misc.imread(os.path.join(cls_root, img_name)) for img_name in os.listdir(cls_root)]
         cls_images = [np.repeat(np.expand_dims(img, 2), 3, axis=2) if len(img.shape) == 2 else img for img in
                       cls_images]
-        cls_images = np.array(
-            [np.reshape(cv2.resize(image, dsize=(224, 224), interpolation=cv2.INTER_CUBIC), (3, 224, 224)) for image in
-             cls_images])
+        cls_images = np.array([np.reshape(cv2.resize(img, dsize=(224, 224)), (3, 224, 224)) for img in cls_images])
         new_index = np.random.permutation(np.arange(cls_images.shape[0]))
         cls_images = cls_images[new_index, :, :, :]
 
@@ -390,10 +389,8 @@ def get_svhn_full(save_dir=None, root_path=None):
 
 
 def get_fashion_mnist():
-    dataset_train = tfds.as_numpy(
-        tfds.load(name="fashion_mnist", split=tfds.Split.TRAIN, shuffle_files=True, batch_size=-1))
-    dataset_test = tfds.as_numpy(
-        tfds.load(name="fashion_mnist", split=tfds.Split.TEST, shuffle_files=True, batch_size=-1))
+    dataset_train = tfds.as_numpy(tfds.load(name="fashion_mnist", split=tfds.Split.TRAIN, batch_size=-1))
+    dataset_test = tfds.as_numpy(tfds.load(name="fashion_mnist", split=tfds.Split.TEST, batch_size=-1))
 
     x_train, y_train = dataset_train["image"], dataset_train["label"]
     x_test, y_test = dataset_test["image"], dataset_test["label"]
@@ -411,23 +408,18 @@ def get_fashion_mnist():
 
 
 def get_flowers_102():
-    dataset_train = tfds.as_numpy(
-        tfds.load(name="oxford_flowers102", split=tfds.Split.TRAIN, shuffle_files=True, batch_size=-1))
-
-    dataset_validation = tfds.as_numpy(
-        tfds.load(name="oxford_flowers102", split=tfds.Split.VALIDATION, shuffle_files=True, batch_size=-1))
-
-    dataset_test = tfds.as_numpy(
-        tfds.load(name="oxford_flowers102", split=tfds.Split.TEST, shuffle_files=True, batch_size=-1))
+    dataset_train = tfds.as_numpy(tfds.load(name="oxford_flowers102", split=tfds.Split.TRAIN, batch_size=-1))
+    dataset_validation = tfds.as_numpy(tfds.load(name="oxford_flowers102", split=tfds.Split.VALIDATION, batch_size=-1))
+    dataset_test = tfds.as_numpy(tfds.load(name="oxford_flowers102", split=tfds.Split.TEST, batch_size=-1))
 
     x_train, y_train = dataset_train["image"], dataset_train["label"]
     x_validation, y_validation = dataset_validation["image"], dataset_validation["label"]
     x_test, y_test = dataset_test["image"], dataset_test["label"]
 
     # resize images
-    x_train = np.array([cv2.resize(img, dsize=(32, 32), interpolation=cv2.INTER_CUBIC) for img in x_train])
-    x_validation = np.array([cv2.resize(img, dsize=(32, 32), interpolation=cv2.INTER_CUBIC) for img in x_validation])
-    x_test = np.array([cv2.resize(img, dsize=(32, 32), interpolation=cv2.INTER_CUBIC) for img in x_test])
+    x_train = np.array([cv2.resize(img, dsize=(32, 32)) for img in x_train])
+    x_validation = np.array([cv2.resize(img, dsize=(32, 32)) for img in x_validation])
+    x_test = np.array([cv2.resize(img, dsize=(32, 32)) for img in x_test])
 
     # format dataset to channels x height x width
     x_train = np.rollaxis(x_train, 3, 1)
@@ -445,26 +437,28 @@ def get_flowers_102():
 
 
 def get_food_101():
-    dataset_train = tfds.as_numpy(
-        tfds.load(name="food101", split=tfds.Split.TRAIN, shuffle_files=True, batch_size=-1))
-    dataset_test = tfds.as_numpy(
-        tfds.load(name="food101", split=tfds.Split.TEST, shuffle_files=True, batch_size=-1))
+    dataset = tfds.as_numpy(tfds.load(name="food101", split=tfds.Split.TRAIN, batch_size=-1))
+    x, y = dataset["image"], dataset["label"]
 
-    # TODO Create train validation test
-    x_train, y_train = dataset_train["image"], dataset_train["label"]
-    x_test, y_test = dataset_test["image"], dataset_test["label"]
+    # Split Percentages: train = 80%, validation  = 10%, test is 10%
+    x_train, y_train, x, y = train_test_split(x, y, test_size=0.2, shuffle=False)
+    x_validation, y_validation, x_test, y_test = train_test_split(x, y, test_size=0.5, shuffle=False)
 
     # resize images
-    x_train = np.array([cv2.resize(image, dsize=(32, 32), interpolation=cv2.INTER_CUBIC) for image in x_train])
-    x_test = np.array([cv2.resize(image, dsize=(32, 32), interpolation=cv2.INTER_CUBIC) for image in x_test])
+    x_train = np.array([cv2.resize(img, dsize=(32, 32)) for img in x_train])
+    x_validation = np.array([cv2.resize(img, dsize=(32, 32)) for img in x_validation])
+    x_test = np.array([cv2.resize(img, dsize=(32, 32)) for img in x_test])
 
     # format dataset to channels x height x width
     x_train = np.rollaxis(x_train, 3, 1)
+    x_validation = np.rollaxis(x_validation, 3, 1)
     x_test = np.rollaxis(x_test, 3, 1)
 
     print('Xtrain shape', x_train.shape)
     print('Ytrain shape', y_train.shape)
+    print('Xval shape', x_validation.shape)
+    print('Yval shape', y_validation.shape)
     print('Xtest shape', x_test.shape)
     print('Ytest shape', y_test.shape)
 
-    return x_train, y_train, x_test, y_test
+    return x_train, y_train, x_validation, y_validation, x_test, y_test
