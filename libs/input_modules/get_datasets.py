@@ -437,22 +437,21 @@ def get_flowers_102():
 
 
 def get_food_101():
-    dataset = tfds.as_numpy(tfds.load(name="food101", split=tfds.Split.TRAIN, batch_size=-1))
-    x, y = dataset["image"], dataset["label"]
-
-    # Split Percentages: train = 80%, validation  = 10%, test is 10%
-    x_train, y_train, x, y = train_test_split(x, y, test_size=0.2, shuffle=False)
-    x_validation, y_validation, x_test, y_test = train_test_split(x, y, test_size=0.5, shuffle=False)
-
-    # resize images
-    x_train = np.array([cv2.resize(img, dsize=(32, 32)) for img in x_train])
-    x_validation = np.array([cv2.resize(img, dsize=(32, 32)) for img in x_validation])
-    x_test = np.array([cv2.resize(img, dsize=(32, 32)) for img in x_test])
+    dataset = tfds.as_numpy(tfds.load("food101", split=tfds.Split.TRAIN))
+    x = []
+    y = []
+    for example in dataset:
+        # resize images
+        x.append(cv2.resize(example["image"], dsize=(32, 32)))
+        y.append(example["label"])
+    x, y = np.array(x), np.array(y)
 
     # format dataset to channels x height x width
-    x_train = np.rollaxis(x_train, 3, 1)
-    x_validation = np.rollaxis(x_validation, 3, 1)
-    x_test = np.rollaxis(x_test, 3, 1)
+    x = np.rollaxis(x, 3, 1)
+
+    # Split Percentages: train = 80%, validation  = 10%, test is 10%
+    x_train, x, y_train, y = train_test_split(x, y, test_size=0.2, shuffle=False)
+    x_validation, x_test, y_validation, y_test = train_test_split(x, y, test_size=0.5, shuffle=False)
 
     print('Xtrain shape', x_train.shape)
     print('Ytrain shape', y_train.shape)
