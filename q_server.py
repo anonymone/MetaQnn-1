@@ -263,6 +263,9 @@ class QConnection(protocol.Protocol):
 
 
 def main():
+    IPAddr = socket.gethostbyname(socket.gethostname())
+    print("Your Computer IP Address is:" + IPAddr)
+
     parser = argparse.ArgumentParser()
     
     model_pkgpath = os.path.join(os.path.dirname(__file__),'models')
@@ -295,6 +298,7 @@ def main():
 
     reactor.listenTCP(8000,factory)
     reactor.run()
+
 
 # this only runs if the module was *not* imported
 if __name__ == '__main__':
