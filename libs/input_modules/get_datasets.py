@@ -8,6 +8,7 @@ import urllib.parse
 import urllib.request
 
 import numpy as np
+import cv2
 from scipy import io, misc
 
 import tensorflow_datasets as tfds
@@ -63,7 +64,9 @@ def get_caltech101(save_dir=None, root_path=None):
         cls_images = [misc.imread(os.path.join(cls_root, img_name)) for img_name in os.listdir(cls_root)]
         cls_images = [np.repeat(np.expand_dims(img, 2), 3, axis=2) if len(img.shape) == 2 else img for img in
                       cls_images]
-        cls_images = np.array([np.reshape(misc.imresize(img, (224, 224, 3)), (3, 224, 224)) for img in cls_images])
+        cls_images = np.array(
+            [np.reshape(cv2.resize(image, dsize=(224, 224), interpolation=cv2.INTER_CUBIC), (3, 224, 224)) for image in
+             cls_images])
         new_index = np.random.permutation(np.arange(cls_images.shape[0]))
         cls_images = cls_images[new_index, :, :, :]
 
@@ -114,7 +117,7 @@ def get_cifar10(save_dir=None, root_path=None):
     if root_path is None:
         print('Downloading CIFAR10 dataset...')
         tar_path = os.path.join(save_dir, "cifar-10-python.tar.gz")
-        url = urlopen()
+        url = urllib.request.URLopener()
         url.retrieve("https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz", tar_path)
         print('Download Done, Extracting...')
         tar = tarfile.open(tar_path)
@@ -169,7 +172,7 @@ def get_cifar100(save_dir=None, root_path=None):
     if root_path is None:
         print('Downloading CIFAR100 dataset...')
         tar_path = os.path.join(save_dir, "cifar-100-python.tar.gz")
-        url = urlopen()
+        url = urllib.request.URLopener()
         url.retrieve("https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz", tar_path)
         print('Download Done, Extracting...')
         tar = tarfile.open(tar_path)
@@ -231,7 +234,7 @@ def get_mnist(save_dir=None, root_path=None):
             out_file = os.path.join(save_dir, "%s" % fname)
             tar_path = os.path.join(save_dir, "%s.gz" % fname)
             out_mnist_files.append(out_file)
-            url = urlopen()
+            url = urllib.request.URLopener()
             url.retrieve("http://yann.lecun.com/exdb/mnist/%s.gz" % fname, tar_path)
             print('Download Done, Extracting... [%s]' % tar_path)
             os.system('gunzip -f %s' % tar_path)
@@ -264,7 +267,7 @@ def get_svhn(save_dir=None, root_path=None):
             os.mkdir(new_save_dir)
         train_mat = os.path.join(new_save_dir, "train_32x32.mat")
         test_mat = os.path.join(new_save_dir, "test_32x32.mat")
-        url = urlopen()
+        url = urllib.request.URLopener()
 
         print('Downloading Svhn Train...')
         url.retrieve("http://ufldl.stanford.edu/housenumbers/train_32x32.mat", train_mat)
@@ -344,7 +347,7 @@ def get_svhn_full(save_dir=None, root_path=None):
         if not os.path.isdir(new_save_dir):
             os.mkdir(new_save_dir)
         extra_mat = os.path.join(new_save_dir, "extra_32x32.mat")
-        url = urlopen()
+        url = urllib.request.URLopener()
 
         print('Downloading Svhn Extra...')
         url.retrieve("http://ufldl.stanford.edu/housenumbers/extra_32x32.mat", extra_mat)
@@ -392,8 +395,17 @@ def get_fashion_mnist():
     dataset_test = tfds.as_numpy(
         tfds.load(name="fashion_mnist", split=tfds.Split.TEST, shuffle_files=True, batch_size=-1))
 
-    x_train, y_train = np.rollaxis(dataset_train["image"], 3, 1), dataset_train["label"]
-    x_test, y_test = np.rollaxis(dataset_test["image"], 3, 1), dataset_test["label"]
+    x_train, y_train = dataset_train["image"], dataset_train["label"]
+    x_test, y_test = dataset_test["image"], dataset_test["label"]
+
+    # format dataset to channels x height x width
+    x_train = np.rollaxis(x_train, 3, 1)
+    x_test = np.rollaxis(x_test, 3, 1)
+
+    print('Xtrain shape', x_train.shape)
+    print('Ytrain shape', y_train.shape)
+    print('Xtest shape', x_test.shape)
+    print('Ytest shape', y_test.shape)
 
     return x_train, y_train, x_test, y_test
 
@@ -404,7 +416,46 @@ def get_flowers_102():
     dataset_test = tfds.as_numpy(
         tfds.load(name="oxford_flowers102", split=tfds.Split.TEST, shuffle_files=True, batch_size=-1))
 
-    x_train, y_train = np.rollaxis(dataset_train["image"], 3, 1), dataset_train["label"]
-    x_test, y_test = np.rollaxis(dataset_test["image"], 3, 1), dataset_test["label"]
+    x_train, y_train = dataset_train["image"], dataset_train["label"]
+    x_test, y_test = dataset_test["image"], dataset_test["label"]
+
+    # resize images
+    x_train = np.array([cv2.resize(image, dsize=(32, 32), interpolation=cv2.INTER_CUBIC) for image in x_train])
+    x_test = np.array([cv2.resize(image, dsize=(32, 32), interpolation=cv2.INTER_CUBIC) for image in x_test])
+
+    # format dataset to channels x height x width
+    x_train = np.rollaxis(x_train, 3, 1)
+    x_test = np.rollaxis(x_test, 3, 1)
+
+    print('Xtrain shape', x_train.shape)
+    print('Ytrain shape', y_train.shape)
+    print('Xtest shape', x_test.shape)
+    print('Ytest shape', y_test.shape)
+
+    return x_train, y_train, x_test, y_test
+
+
+def get_food_101():
+    dataset_train = tfds.as_numpy(
+        tfds.load(name="food101", split=tfds.Split.TRAIN, shuffle_files=True, batch_size=-1))
+    dataset_test = tfds.as_numpy(
+        tfds.load(name="food101", split=tfds.Split.TEST, shuffle_files=True, batch_size=-1))
+
+    # TODO Create train validation test
+    x_train, y_train = dataset_train["image"], dataset_train["label"]
+    x_test, y_test = dataset_test["image"], dataset_test["label"]
+
+    # resize images
+    x_train = np.array([cv2.resize(image, dsize=(32, 32), interpolation=cv2.INTER_CUBIC) for image in x_train])
+    x_test = np.array([cv2.resize(image, dsize=(32, 32), interpolation=cv2.INTER_CUBIC) for image in x_test])
+
+    # format dataset to channels x height x width
+    x_train = np.rollaxis(x_train, 3, 1)
+    x_test = np.rollaxis(x_test, 3, 1)
+
+    print('Xtrain shape', x_train.shape)
+    print('Ytrain shape', y_train.shape)
+    print('Xtest shape', x_test.shape)
+    print('Ytest shape', y_test.shape)
 
     return x_train, y_train, x_test, y_test

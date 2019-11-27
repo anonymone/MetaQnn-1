@@ -203,7 +203,7 @@ def create_records(Xtr,
 def main():
     parser = argparse.ArgumentParser()
     dataset_options = ['cifar10', 'cifar100', 'svhn', 'svhn_full', 'svhn_small', 'mnist', 'fashion_mnist', 'caltech101',
-                       'flowers102']
+                       'flowers102', 'food101']
     parser.add_argument('dataset', choices=dataset_options, help='Which data set')
     parser.add_argument('root_save_dir', help='Where to save lmdb')
     parser.add_argument('-v', '--number_val', help='How many validation images', type=int, default=0)
@@ -273,6 +273,9 @@ def main():
         Yte = Yval.copy()
     elif args.dataset == "flowers102":
         Xtr, Ytr, Xval, Yval = get_datasets.get_flowers_102()
+        Xval, Yval = None, None
+    elif args.dataset == 'food101':
+        Xtr, Ytr, Xval, Yval = get_datasets.get_food_101()
         Xval, Yval = None, None
 
     create_records(Xtr=Xtr,
