@@ -436,6 +436,30 @@ def get_flowers_102():
     return x_train, y_train, x_validation, y_validation, x_test, y_test
 
 
+def get_flowers_5():
+    dataset = tfds.as_numpy(tfds.load(name="tf_flowers", split=tfds.Split.TRAIN, batch_size=-1))
+    x, y = dataset["image"], dataset["label"]
+
+    # resize images
+    x = np.array([cv2.resize(img, dsize=(32, 32)) for img in x])
+
+    # format dataset to channels x height x width
+    x = np.rollaxis(x, 3, 1)
+
+    # Split Percentages: train = 80%, validation  = 10%, test is 10%
+    x_train, x, y_train, y = train_test_split(x, y, test_size=0.2, shuffle=False)
+    x_validation, x_test, y_validation, y_test = train_test_split(x, y, test_size=0.5, shuffle=False)
+
+    print('Xtrain shape', x_train.shape)
+    print('Ytrain shape', y_train.shape)
+    print('Xval shape', x_validation.shape)
+    print('Yval shape', y_validation.shape)
+    print('Xtest shape', x_test.shape)
+    print('Ytest shape', y_test.shape)
+
+    return x_train, y_train, x_validation, y_validation, x_test, y_test
+
+
 def get_food_101():
     dataset = tfds.as_numpy(tfds.load("food101", split=tfds.Split.TRAIN))
     x = []
