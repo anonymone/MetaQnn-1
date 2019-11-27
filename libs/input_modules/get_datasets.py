@@ -413,26 +413,35 @@ def get_fashion_mnist():
 def get_flowers_102():
     dataset_train = tfds.as_numpy(
         tfds.load(name="oxford_flowers102", split=tfds.Split.TRAIN, shuffle_files=True, batch_size=-1))
+
+    dataset_validation = tfds.as_numpy(
+        tfds.load(name="oxford_flowers102", split=tfds.Split.VALIDATION, shuffle_files=True, batch_size=-1))
+
     dataset_test = tfds.as_numpy(
         tfds.load(name="oxford_flowers102", split=tfds.Split.TEST, shuffle_files=True, batch_size=-1))
 
     x_train, y_train = dataset_train["image"], dataset_train["label"]
+    x_validation, y_validation = dataset_validation["image"], dataset_validation["label"]
     x_test, y_test = dataset_test["image"], dataset_test["label"]
 
     # resize images
-    x_train = np.array([cv2.resize(image, dsize=(32, 32), interpolation=cv2.INTER_CUBIC) for image in x_train])
-    x_test = np.array([cv2.resize(image, dsize=(32, 32), interpolation=cv2.INTER_CUBIC) for image in x_test])
+    x_train = np.array([cv2.resize(img, dsize=(32, 32), interpolation=cv2.INTER_CUBIC) for img in x_train])
+    x_validation = np.array([cv2.resize(img, dsize=(32, 32), interpolation=cv2.INTER_CUBIC) for img in x_validation])
+    x_test = np.array([cv2.resize(img, dsize=(32, 32), interpolation=cv2.INTER_CUBIC) for img in x_test])
 
     # format dataset to channels x height x width
     x_train = np.rollaxis(x_train, 3, 1)
+    x_validation = np.rollaxis(x_validation, 3, 1)
     x_test = np.rollaxis(x_test, 3, 1)
 
     print('Xtrain shape', x_train.shape)
     print('Ytrain shape', y_train.shape)
+    print('Xval shape', x_validation.shape)
+    print('Yval shape', y_validation.shape)
     print('Xtest shape', x_test.shape)
     print('Ytest shape', y_test.shape)
 
-    return x_train, y_train, x_test, y_test
+    return x_train, y_train, x_validation, y_validation, x_test, y_test
 
 
 def get_food_101():

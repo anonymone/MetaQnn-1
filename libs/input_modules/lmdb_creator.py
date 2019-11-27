@@ -272,8 +272,7 @@ def main():
         Xte = Xval.copy()
         Yte = Yval.copy()
     elif args.dataset == "flowers102":
-        Xtr, Ytr, Xval, Yval = get_datasets.get_flowers_102()
-        Xval, Yval = None, None
+        Xtr, Ytr, Xval, Yval, Xte, Yte = get_datasets.get_flowers_102()
     elif args.dataset == 'food101':
         Xtr, Ytr, Xval, Yval = get_datasets.get_food_101()
         Xval, Yval = None, None
