@@ -1,13 +1,13 @@
-MetaQNN Codebase
+MetaQNN
 ========
 
-MetaQNN is a codebase used for automatically designing convolutional neural network architectures outlined in the paper: 
+MetaQNN is a codebase forked from [https://github.com/bowenbaker/metaqnn bowenbaken/metaqnn] used for automatically designing convolutional neural network architectures outlined in the paper: 
 
 **[Designing Neural Network Architectures Using Reinforcement Learning](https://arxiv.org/pdf/1611.02167.pdf)**   
 Bowen Baker, Otkrist Gupta, Nikhil Naik, Ramesh Raskar  
 *International Conference on Learning Representations*, 2017
 
-If our software or paper helps your research or project, please cite us using:
+If this software or paper helps your research or project, please cite using:
 
     @article{baker2017designing,
       title={Designing Neural Network Architectures using Reinforcement Learning},
@@ -16,9 +16,16 @@ If our software or paper helps your research or project, please cite us using:
       year={2017}
     }
 
-# Installation
-1. Install caffe using these [instructions](https://github.com/BVLC/caffe/wiki/Ubuntu-16.04-or-15.10-Installation-Guide) with CUDA 8 and cuDNN 5.1.
-2. ```pip install -r requirements.txt```
+# Differences from original repository
+1. Cnverted from python2 to python3 and also 
+2. Fixed the issue of not producing pool layers
+3. Added more datsets.
+
+# Dependences
+Python 3 based:
+1. install caffe using ```conda install caffe-gpu```
+2. install lmdb using ```conda install lmdb python-lmdb```
+3. install the other requirements using ```pip install -r requirements.txt```
 
 # Quick Example (CIFAR-10)
 1. Create CIFAR-10 LMDB's on each server you plan to use for training  
