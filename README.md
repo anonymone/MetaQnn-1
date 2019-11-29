@@ -1,7 +1,7 @@
 MetaQNN
 ========
 
-MetaQNN is a codebase forked from [https://github.com/bowenbaker/metaqnn bowenbaken/metaqnn] used for automatically designing convolutional neural network architectures outlined in the paper: 
+MetaQNN is a codebase forked from [bowenbaken/metaqnn](https://github.com/bowenbaker/metaqnn) used for automatically designing convolutional neural network architectures outlined in the paper: 
 
 **[Designing Neural Network Architectures Using Reinforcement Learning](https://arxiv.org/pdf/1611.02167.pdf)**   
 Bowen Baker, Otkrist Gupta, Nikhil Naik, Ramesh Raskar  
