@@ -24,7 +24,7 @@ If our software or paper helps your research or project, please cite us using:
 1. Create CIFAR-10 LMDB's on each server you plan to use for training  
 
     ``` bash
-    python3 libs/input_modules/lmdb_creator.py cifar10 /path/to/data/directory/cifar10 -gcn True -v 5000
+    python3 libs/input_modules/lmdb_creator.py cifar10 -gcn True -v 5000
     ```
     
 2. Modify `models/cifar10/hyper_parameters.py`  
@@ -68,25 +68,25 @@ python3 libs/input_modules/lmdb_creator.py -h
 1. Create CIFAR-10 dataset with global contrast normalization and 5000 validation images run
 
     ```bash
-    python3 libs/input_modules/lmdb_creator.py cifar10 /path/to/data/directory/cifar10 -gcn True -v 5000
+    python3 libs/input_modules/lmdb_creator.py cifar10 -gcn True -v 5000
     ```
     
 2. Create MNIST dataset with mean subtraction and 10000 validation images
 
     ```bash
-    python3 libs/input_modules/lmdb_creator.py mnist /path/to/data/directory/mnist -ms True -v 10000
+    python3 libs/input_modules/lmdb_creator.py mnist -ms True -v 10000
     ```
 
 3. Create the SVHN dataset with the extra 531131 training images and local contrast normalization and standard validation set
 
     ```bash
-    python3 libs/input_modules/lmdb_creator.py svhn_full /path/to/data/directory/svhn_full -prep lcn 
+    python3 libs/input_modules/lmdb_creator.py svhn_full -prep lcn 
     ```
     
 4. Create the 10% SVHN dataset with standard whitening
 
     ```bash
-    python3 libs/input_modules/lmdb_creator.py svhn_small /path/to/data/directory/svhn -prep standard_whiten
+    python3 libs/input_modules/lmdb_creator.py svhn_small -prep standard_whiten
     ```
 
 # Speeding Up Meta-Modeling with Performance Prediction
