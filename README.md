@@ -17,9 +17,9 @@ If this software or paper helps your research or project, please cite using:
     }
 
 # Differences from original repository
-1. Cnverted from python2 to python3 and also 
-2. Fixed the issue of not producing pool layers
-3. Added more datsets.
+1. Convert from python2 to python3
+2. Fix the issue of not producing pool layers
+3. Add more datsets.
 
 # Dependences
 Python 3 based:
