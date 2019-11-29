@@ -8,11 +8,21 @@ import urllib.parse
 import urllib.request
 
 import numpy as np
+import csv
 import cv2
+import sys
+from zipfile import ZipFile
 from scipy import io, misc
+import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 import tensorflow_datasets as tfds
+
+
+def _progress(count, block_size, total_size):
+    sys.stdout.write('\rDownloading %.2f%%' % (float(count * block_size) /
+                                               float(total_size) * 100.0))
+    sys.stdout.flush()
 
 
 def get_byte(file_in):
@@ -40,7 +50,7 @@ def get_caltech101(save_dir):
         x_train.append(cv2.resize(example["image"], dsize=(226, 226)))
         y_train.append(example["label"])
     x_train, y_train = np.array(x_train), np.array(y_train)
-    
+
     dataset_test = tfds.as_numpy(tfds.load("caltech101", data_dir=save_dir, split=tfds.Split.TEST))
     x_test, y_test = [], []
     for example in dataset_test:
@@ -75,12 +85,13 @@ def load_CIFAR_batch(filename):
 def get_cifar10(save_dir):
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
-        print('Downloading CIFAR10 dataset...')
-        tar_path = os.path.join(save_dir, "cifar-10-python.tar.gz")
-        url = urllib.request.URLopener()
-        url.retrieve("https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz", tar_path)
-        print('Download Done, Extracting...')
-        tar = tarfile.open(tar_path)
+        print('Download CIFAR10 dataset...')
+        url = "https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz"
+        filename = url.split('/')[-1]
+        filepath = os.path.join(save_dir, filename)
+        filepath, _ = urllib.request.urlretrieve(url, filepath, reporthook=_progress)
+        print('\nDownload Done, Extracting... [%s]' % filename)
+        tar = tarfile.open(filepath)
         tar.extractall(save_dir)
         tar.close()
 
@@ -120,15 +131,15 @@ def load_cifar100_data(filename):
 
 
 def get_cifar100(save_dir):
-    caltech101
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
-        print('Downloading CIFAR100 dataset...')
-        tar_path = os.path.join(save_dir, "cifar-100-python.tar.gz")
-        url = urllib.request.URLopener()
-        url.retrieve("https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz", tar_path)
-        print('Download Done, Extracting...')
-        tar = tarfile.open(tar_path)
+        print('Download CIFAR100 dataset...')
+        url = "https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz"
+        filename = url.split('/')[-1]
+        filepath = os.path.join(save_dir, filename)
+        filepath, _ = urllib.request.urlretrieve(url, filepath, reporthook=_progress)
+        print('\nDownload Done, Extracting... [%s]' % filename)
+        tar = tarfile.open(filepath)
         tar.extractall(save_dir)
         tar.close()
 
@@ -175,13 +186,16 @@ def get_mnist(save_dir):
 
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
-        print('Downloading MNIST dataset...')
+        print('Download MNIST dataset...')
         for filename in mnist_files:
-            tar_path = os.path.join(save_dir, "%s.gz" % filename)
-            url = urllib.request.URLopener()
-            url.retrieve("http://yann.lecun.com/exdb/mnist/%s.gz" % filename, tar_path)
-            print('Download Done, Extracting... [%s]' % tar_path)
-            os.system('gunzip -f %s' % tar_path)
+            url = 'http://yann.lecun.com/exdb/mnist/' + filename + '.gz'
+            filename = url.split('/')[-1]
+            filepath = os.path.join(save_dir, filename)
+            filepath, _ = urllib.request.urlretrieve(url, filepath, reporthook=_progress)
+            print('\nDownload Done, Extracting... [%s]' % filename)
+            tar = tarfile.open(filepath, 'r:gz')
+            tar.extractall(filepath)
+            tar.close()
 
     Xtr, Ytr = load_mnist(out_mnist_files[0], out_mnist_files[1])
     print('Xtrain shape', Xtr.shape)
@@ -198,16 +212,20 @@ def get_mnist(save_dir):
 def get_svhn(save_dir):
     root = os.path.join(save_dir, 'og_data')
     if not os.path.isdir(save_dir):
+        print('Download SVHN dataset...')
         os.makedirs(save_dir)
         if not os.path.isdir(root):
             os.mkdir(root)
-        train_mat = os.path.join(root, "train_32x32.mat")
-        test_mat = os.path.join(root, "test_32x32.mat")
-        url = urllib.request.URLopener()
-        print('Downloading Svhn Train...')
-        url.retrieve("http://ufldl.stanford.edu/housenumbers/train_32x32.mat", train_mat)
-        print('Downloading Svhn Test...')
-        url.retrieve("http://ufldl.stanford.edu/housenumbers/test_32x32.mat", test_mat)
+        train_url = "http://ufldl.stanford.edu/housenumbers/train_32x32.mat"
+        train_name = train_url.split('/')[-1]
+        train_path = os.path.join(root, train_name)
+        test_url = "http://ufldl.stanford.edu/housenumbers/test_32x32.mat"
+        test_name = test_url.split('/')[-1]
+        test_path = os.path.join(root, test_name)
+        filepath, _ = urllib.request.urlretrieve(train_url, train_path, reporthook=_progress)
+        print()
+        filepath, _ = urllib.request.urlretrieve(test_url, test_path, reporthook=_progress)
+        print()
 
     train = io.loadmat(os.path.join(root, 'train_32x32.mat'))
     Xtr = train['X']
@@ -268,10 +286,12 @@ def get_svhn_full(save_dir):
     root = os.path.join(save_dir, 'og_data')
     extra_mat = os.path.join(root, "extra_32x32.mat")
     if not os.path.exists(extra_mat):
-        extra_mat = os.path.join(root, "extra_32x32.mat")
-        url = urllib.request.URLopener()
-        print('Downloading Svhn Extra...')
-        url.retrieve("http://ufldl.stanford.edu/housenumbers/extra_32x32.mat", extra_mat)
+        print('Download SVHN extra dataset...')
+        url = "http://ufldl.stanford.edu/housenumbers/extra_32x32.mat"
+        filename = url.split('/')[-1]
+        filepath = os.path.join(root, filename)
+        filepath, _ = urllib.request.urlretrieve(url, filepath, reporthook=_progress)
+        print()
 
     extra = io.loadmat(os.path.join(root, 'extra_32x32.mat'))
     Xtr_extra = extra['X']
@@ -373,8 +393,8 @@ def get_flowers_5(save_dir):
     x = np.rollaxis(x, 3, 1)
 
     # Split Percentages: train = 80%, validation  = 10%, test is 10%
-    x_train, x, y_train, y = train_test_split(x, y, test_size=0.2, shuffle=False)
-    x_validation, x_test, y_validation, y_test = train_test_split(x, y, test_size=0.5, shuffle=False)
+    x_train, x, y_train, y = train_test_split(x, y, test_size=0.2)
+    x_validation, x_test, y_validation, y_test = train_test_split(x, y, test_size=0.5)
 
     print('Xtrain shape', x_train.shape)
     print('Ytrain shape', y_train.shape)
@@ -400,8 +420,8 @@ def get_food_101(save_dir):
     x = np.rollaxis(x, 3, 1)
 
     # Split Percentages: train = 80%, validation  = 10%, test is 10%
-    x_train, x, y_train, y = train_test_split(x, y, test_size=0.2, shuffle=False)
-    x_validation, x_test, y_validation, y_test = train_test_split(x, y, test_size=0.5, shuffle=False)
+    x_train, x, y_train, y = train_test_split(x, y, test_size=0.2)
+    x_validation, x_test, y_validation, y_test = train_test_split(x, y, test_size=0.5)
 
     print('Xtrain shape', x_train.shape)
     print('Ytrain shape', y_train.shape)
@@ -432,13 +452,15 @@ def load_stl_10(path):
 def get_stl_10(save_dir):
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
-        print('Downloading STL-10 dataset...')
+        print('Download STL-10 dataset...')
         data_url = "http://ai.stanford.edu/~acoates/stl10/stl10_binary.tar.gz"
         filename = data_url.split('/')[-1]
         filepath = os.path.join(save_dir, filename)
-        filepath, _ = urllib.request.urlretrieve(data_url, filepath)
-        print('Download Done, Extracting... [%s]' % filename)
-        tarfile.open(filepath, 'r:gz').extractall(save_dir)
+        filepath, _ = urllib.request.urlretrieve(data_url, filepath, reporthook=_progress)
+        print('\nDownload Done, Extracting... [%s]' % filename)
+        tar = tarfile.open(filepath, 'r:gz')
+        tar.extractall(save_dir)
+        tar.close()
 
     x_train, y_train, x_test, y_test = load_stl_10(os.path.join(save_dir, "stl10_binary"))
 
@@ -449,10 +471,10 @@ def get_stl_10(save_dir):
     # format dataset to channels x height x width
     x_train = np.rollaxis(x_train, 3, 1)
     x_test = np.rollaxis(x_test, 3, 1)
-    
+
     # make labels from [1-10] to [0-9]
     y_train = np.array([y - 1 for y in y_train])
-    y_test = np.array([y - 1 for y in y_test]) 
+    y_test = np.array([y - 1 for y in y_test])
 
     print('Xtrain shape', x_train.shape)
     print('Ytrain shape', y_train.shape)
@@ -461,3 +483,56 @@ def get_stl_10(save_dir):
 
     return x_train, y_train, x_test, y_test
 
+
+def load_gtsrb(path):
+    x = []  # images
+    y = []  # corresponding labels
+    # loop over all 43 classes
+    for label in range(43):
+        prefix = path + '/' + format(label, '05d') + '/'  # subdirectory for class
+        gtFile = open(prefix + 'GT-' + format(label, '05d') + '.csv')  # annotations file
+        gtReader = csv.reader(gtFile, delimiter=';')  # csv parser for annotations file
+        next(gtReader)  # skip header
+        # loop over all images in current annotations file
+        for image in gtReader:
+            x.append(plt.imread(prefix + image[0]))  # the 1th column is the filename
+            y.append(image[7])  # the 8th column is the label
+        gtFile.close()
+
+    return np.array(x), np.array(y)
+
+
+def get_gtsrb(save_dir):
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
+        print('Download GTSRB dataset...')
+        url = "https://sid.erda.dk/public/archives/daaeac0d7ce1152aea9b61d9f1e19370/GTSRB_Final_Training_Images.zip"
+        filename = url.split('/')[-1]
+        filepath = os.path.join(save_dir, filename)
+        filepath, _ = urllib.request.urlretrieve(url, filepath, reporthook=_progress)
+        print('\nDownload Done, Extracting... [%s]' % filename)
+        zip = ZipFile(filepath, mode='r')
+        zip.extractall(save_dir)
+        zip.close()
+
+    filepath = os.path.join(os.path.join(os.path.join(save_dir, "GTSRB"), "Final_Training"), "Images")
+    x, y = load_gtsrb(filepath)
+
+    # resize images
+    x = np.array([cv2.resize(img, dsize=(28, 28)) for img in x])
+
+    # format dataset to channels x height x width
+    x = np.rollaxis(x, 3, 1)
+
+    # Split Percentages: train = 80%, validation  = 10%, test is 10%
+    x_train, x, y_train, y = train_test_split(x, y, test_size=0.2)
+    x_validation, x_test, y_validation, y_test = train_test_split(x, y, test_size=0.5)
+
+    print('Xtrain shape', x_train.shape)
+    print('Ytrain shape', y_train.shape)
+    print('Xval shape', x_validation.shape)
+    print('Yval shape', y_validation.shape)
+    print('Xtest shape', x_test.shape)
+    print('Ytest shape', y_test.shape)
+
+    return x_train, y_train, x_validation, y_validation, x_test, y_test

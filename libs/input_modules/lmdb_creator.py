@@ -202,8 +202,8 @@ def create_records(x_train,
 
 def main():
     parser = argparse.ArgumentParser()
-    dataset_options = ['caltech101', 'cifar10', 'cifar100', 'svhn', 'svhn_full', 'svhn_small', 'mnist', 'fashion_mnist',
-                       'flowers102', 'food101', 'flower5', 'stl10']
+    dataset_options = ['caltech101', 'cifar10', 'cifar100', 'fashion_mnist', 'flowers102', 'flower5', 'food101',
+                       'gtsrb', 'mnist', 'stl10', 'svhn', 'svhn_full', 'svhn_small']
     parser.add_argument('dataset', choices=dataset_options, help='Which data set')
     parser.add_argument('-v', '--number_val', help='How many validation images', type=int, default=0)
     parser.add_argument('-prep', '--preprocessing', help='Which per image preprocessing function to use', default=None,
@@ -232,11 +232,35 @@ def main():
 
     padding = args.padding if args.padding else 0
 
-    if args.dataset == 'cifar10':
+    if args.dataset == 'caltech101':
+        x_train, y_train, x_test, y_test = get_datasets.get_caltech101(save_dir=dataset_directory)
+        x_validation, y_validation = x_test.copy(), y_test.copy()
+    elif args.dataset == 'cifar10':
         x_train, y_train, x_test, y_test = get_datasets.get_cifar10(save_dir=dataset_directory)
         x_validation, y_validation = None, None
     elif args.dataset == 'cifar100':
         x_train, y_train, x_test, y_test = get_datasets.get_cifar100(save_dir=dataset_directory)
+        x_validation, y_validation = None, None
+    elif args.dataset == 'fashion_mnist':
+        x_train, y_train, x_test, y_test = get_datasets.get_fashion_mnist(save_dir=dataset_directory)
+        x_validation, y_validation = None, None
+    elif args.dataset == 'flowers102':
+        x_train, y_train, x_validation, y_validation, x_test, y_test = get_datasets.get_flowers_102(
+            save_dir=dataset_directory)
+    elif args.dataset == 'flower5':
+        x_train, y_train, x_validation, y_validation, x_test, y_test = get_datasets.get_flowers_5(
+            save_dir=dataset_directory)
+    elif args.dataset == 'food101':
+        x_train, y_train, x_validation, y_validation, x_test, y_test = get_datasets.get_food_101(
+            save_dir=dataset_directory)
+    elif args.dataset == 'gtsrb':
+        x_train, y_train, x_validation, y_validation, x_test, y_test = get_datasets.get_gtsrb(
+            save_dir=dataset_directory)
+    elif args.dataset == 'mnist':
+        x_train, y_train, x_test, y_test = get_datasets.get_mnist(save_dir=dataset_directory)
+        x_validation, y_validation = None, None
+    elif args.dataset == 'stl10':
+        x_train, y_train, x_test, y_test = get_datasets.get_stl_10(save_dir=dataset_directory)
         x_validation, y_validation = None, None
     elif args.dataset == 'svhn':
         x_train, y_train, x_test, y_test = get_datasets.get_svhn(save_dir=dataset_directory)
@@ -247,27 +271,6 @@ def main():
     elif args.dataset == 'svhn_small':
         x_train, y_train, x_validation, y_validation, x_test, y_test = get_datasets.get_svhn_small(
             save_dir=dataset_directory)
-    elif args.dataset == 'mnist':
-        x_train, y_train, x_test, y_test = get_datasets.get_mnist(save_dir=dataset_directory)
-        x_validation, y_validation = None, None
-    elif args.dataset == 'fashion_mnist':
-        x_train, y_train, x_test, y_test = get_datasets.get_fashion_mnist(save_dir=dataset_directory)
-        x_validation, y_validation = None, None
-    elif args.dataset == 'caltech101':
-        x_train, y_train, x_test, y_test = get_datasets.get_caltech101(save_dir=dataset_directory)
-        x_validation, y_validation = x_test.copy(), y_test.copy()
-    elif args.dataset == 'flowers102':
-        x_train, y_train, x_validation, y_validation, x_test, y_test = get_datasets.get_flowers_102(
-            save_dir=dataset_directory)
-    elif args.dataset == 'flower5':
-        x_train, y_train, x_validation, y_validation, x_test, y_test = get_datasets.get_flowers_5(
-            save_dir=dataset_directory)
-    elif args.dataset == 'food101':
-        x_train, y_train, x_validation, y_validation, x_test, y_test = get_datasets.get_food_101(
-            save_dir=dataset_directory)
-    elif args.dataset == 'stl10':
-        x_train, y_train, x_test, y_test = get_datasets.get_stl_10(save_dir=dataset_directory)
-        x_validation, y_validation = None, None
 
     create_records(x_train=x_train,
                    y_train=y_train,
@@ -286,4 +289,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
