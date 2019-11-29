@@ -33,62 +33,32 @@ def get_image(file_in, row=28, col=28):
 
 
 def get_caltech101(save_dir):
-    if not os.path.isdir(save_dir):
-        os.makedirs(save_dir)
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
+    dataset_train = tfds.as_numpy(tfds.load("caltech101", data_dir=save_dir, split=tfds.Split.TRAIN))
+    x_train, y_train = [], []
+    for example in dataset_train:
+        # resize images
+        x_train.append(cv2.resize(example["image"], dsize=(32, 32)))
+        y_train.append(example["label"])
+    x_train, y_train = np.array(x_train), np.array(y_train)
+    
+    dataset_test = tfds.as_numpy(tfds.load("caltech101", data_dir=save_dir, split=tfds.Split.TEST))
+    x_test, y_test = [], []
+    for example in dataset_test:
+        # resize images
+        x_test.append(cv2.resize(example["image"], dsize=(32, 32)))
+        y_test.append(example["label"])
+    x_test, y_test = np.array(x_test), np.array(y_test)
 
-        print('Downloading Caltech101 dataset...')
-        tar_path = os.path.join(save_dir, "101_ObjectCategories.tar.gz")
-        url = urllib.request.URLopener(context=ctx)
-        url.retrieve("https://www.vision.caltech.edu/Image_Datasets/Caltech101/101_ObjectCategories.tar.gz", tar_path)
-        print('Download Done, Extracting...')
-        tar = tarfile.open(tar_path)
-        tar.extractall(save_dir)
-        tar.close()
+    # format dataset to channels x height x width
+    x_train = np.rollaxis(x_train, 3, 1)
+    x_test = np.rollaxis(x_test, 3, 1)
 
-    root = os.path.join(save_dir, "101_ObjectCategories")
+    print('Xtrain shape', x_train.shape)
+    print('Ytrain shape', y_train.shape)
+    print('Xtest shape', x_test.shape)
+    print('Ytest shape', y_test.shape)
 
-    train_x = []
-    train_y = []
-    val_x = []
-    val_y = []
-
-    label = 0
-    for cls_folder in os.listdir(root):
-        cls_root = os.path.join(root, cls_folder)
-        if not os.path.isdir(cls_root):
-            continue
-
-        cls_images = [misc.imread(os.path.join(cls_root, img_name)) for img_name in os.listdir(cls_root)]
-        cls_images = [np.repeat(np.expand_dims(img, 2), 3, axis=2) if len(img.shape) == 2 else img for img in
-                      cls_images]
-        cls_images = np.array([np.reshape(cv2.resize(img, dsize=(224, 224)), (3, 224, 224)) for img in cls_images])
-        new_index = np.random.permutation(np.arange(cls_images.shape[0]))
-        cls_images = cls_images[new_index, :, :, :]
-
-        train_x.append(cls_images[:30])
-        train_y.append(np.array([label] * 30))
-        if len(cls_images) <= 80:
-            val_x.append(cls_images[30:])
-            val_y.append(np.array([label] * (len(cls_images) - 30)))
-        else:
-            val_x.append(cls_images[30:80])
-            val_y.append(np.array([label] * 50))
-        label += 1
-
-    Xtr = np.concatenate(train_x)
-    Ytr = np.concatenate(train_y)
-    Xval = np.concatenate(val_x)
-    Yval = np.concatenate(val_y)
-
-    print('Xtr shape ', Xtr.shape)
-    print('Ytr shape ', Ytr.shape)
-    print('Xval shape ', Xval.shape)
-    print('Yval shape ', Yval.shape)
-
-    return Xtr, Ytr, Xval, Yval
+    return x_train, y_train, x_test, y_test
 
 
 def load_CIFAR_batch(filename):
@@ -150,6 +120,7 @@ def load_cifar100_data(filename):
 
 
 def get_cifar100(save_dir):
+    caltech101
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
         print('Downloading CIFAR100 dataset...')
@@ -478,6 +449,10 @@ def get_stl_10(save_dir):
     # format dataset to channels x height x width
     x_train = np.rollaxis(x_train, 3, 1)
     x_test = np.rollaxis(x_test, 3, 1)
+    
+    # make labels from [1-10] to [0-9]
+    y_train = np.array([y - 1 for y in y_train])
+    y_test = np.array([y - 1 for y in y_test]) 
 
     print('Xtrain shape', x_train.shape)
     print('Ytrain shape', y_train.shape)

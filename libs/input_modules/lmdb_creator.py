@@ -254,8 +254,8 @@ def main():
         x_train, y_train, x_test, y_test = get_datasets.get_fashion_mnist(save_dir=dataset_directory)
         x_validation, y_validation = None, None
     elif args.dataset == 'caltech101':
-        x_train, y_train, x_validation, y_validation = get_datasets.get_caltech101(save_dir=dataset_directory)
-        x_test, y_test = x_validation.copy(), y_validation.copy()
+        x_train, y_train, x_test, y_test = get_datasets.get_caltech101(save_dir=dataset_directory)
+        x_validation, y_validation = x_test.copy(), y_test.copy()
     elif args.dataset == 'flowers102':
         x_train, y_train, x_validation, y_validation, x_test, y_test = get_datasets.get_flowers_102(
             save_dir=dataset_directory)
