@@ -37,7 +37,7 @@ def get_caltech101(save_dir):
     x_train, y_train = [], []
     for example in dataset_train:
         # resize images
-        x_train.append(cv2.resize(example["image"], dsize=(32, 32)))
+        x_train.append(cv2.resize(example["image"], dsize=(226, 226)))
         y_train.append(example["label"])
     x_train, y_train = np.array(x_train), np.array(y_train)
     
@@ -45,7 +45,7 @@ def get_caltech101(save_dir):
     x_test, y_test = [], []
     for example in dataset_test:
         # resize images
-        x_test.append(cv2.resize(example["image"], dsize=(32, 32)))
+        x_test.append(cv2.resize(example["image"], dsize=(226, 226)))
         y_test.append(example["label"])
     x_test, y_test = np.array(x_test), np.array(y_test)
 
