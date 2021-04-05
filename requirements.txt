@@ -45,3 +45,5 @@ Twisted
 wcwidth
 Yapps
 zope.interface
+tensorflow_datasets
+tensorflow
